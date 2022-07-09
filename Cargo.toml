@@ -1,0 +1,17 @@
+[package]
+name = "rust_graphical_oscillator"
+version = "0.1.0"
+authors = ["MajorX234 <majorx234@googlemail.com>"]
+edition = "2018"
+
+[lib]
+name = "oscillator_lib"
+path = "src/lib.rs"
+
+[[bin]]
+name = "oscillator_gui"
+path = "src/oscillator_gui/bin/main.rs"
+
+[dependencies]
+eframe = { version = "0.18.0"}
+scan_fmt = "0.2.6"
