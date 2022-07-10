@@ -34,6 +34,7 @@ impl eframe::App for OszilatorGui {
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.heading("Plot");
             ui.horizontal(|ui| {
+                ui.add(egui::DragValue::new(&mut self.freq).speed(1.0));
                 Plot::new("my_wave")
                     .view_aspect(2.0)
                     .show(ui, |plot_ui| plot_ui.line(wave_line));
