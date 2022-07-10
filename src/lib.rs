@@ -27,5 +27,8 @@ pub mod wave_gen {
                 println!("{}", sample);
             }
         }
+        pub fn get_values(&self) -> (usize, &std::vec::Vec<f32>) {
+            return (self.num_samples, &self.values);
+        }
     }
 }
