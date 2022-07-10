@@ -3,21 +3,24 @@ pub mod wave_gen {
 
     #[derive(Debug)]
     pub struct SineWave {
-        freq: u32,
+        freq_base: f32,
+        freq_am: f32,
+        freq_fm: f32,
         num_samples: usize,
         values: Vec<f32>,
     }
 
     impl SineWave {
-        pub fn new(freq: u32, num_samples: usize) -> SineWave {
+        pub fn new(freq_base: f32, freq_am: f32, freq_fm: f32, num_samples: usize) -> SineWave {
             let fsample_rate: f32 = 48000.0;
-            let ffreq = freq as f32;
 
             let values_data = (0..num_samples)
-                .map(|i| ((2.0 * f32::consts::PI * ffreq * (i as f32) / fsample_rate).sin()))
+                .map(|i| ((2.0 * f32::consts::PI * freq_base * (i as f32) / fsample_rate).sin()))
                 .collect();
             return SineWave {
-                freq: freq,
+                freq_base: freq_base,
+                freq_am: freq_am,
+                freq_fm: freq_fm,
                 num_samples: num_samples,
                 values: values_data,
             };
