@@ -8,14 +8,30 @@ pub mod wave_gen {
         freq_fm: f32,
         num_samples: usize,
         values: Vec<f32>,
+        fs: f32,
     }
 
     impl SineWave {
-        pub fn new(freq_base: f32, freq_am: f32, freq_fm: f32, num_samples: usize) -> SineWave {
-            let fsample_rate: f32 = 48000.0;
-
+        pub fn new(
+            freq_base: f32,
+            freq_am: f32,
+            freq_fm: f32,
+            fs: f32,
+            num_samples: usize,
+        ) -> SineWave {
+            let shift = |t: f32, freq_fm: f32, fs: f32| -> f32 {
+                0.11 / freq_fm * (2.0 * f32::consts::PI * t * freq_fm / fs).cos()
+            };
             let values_data = (0..num_samples)
-                .map(|i| ((2.0 * f32::consts::PI * freq_base * (i as f32) / fsample_rate).sin()))
+                .map(|i| {
+                    ((2.0
+                        * f32::consts::PI
+                        * freq_base
+                        * (i as f32)
+                        * shift(i as f32, freq_fm, fs)
+                        / fs)
+                        .sin())
+                })
                 .collect();
             return SineWave {
                 freq_base: freq_base,
@@ -23,6 +39,7 @@ pub mod wave_gen {
                 freq_fm: freq_fm,
                 num_samples: num_samples,
                 values: values_data,
+                fs: fs,
             };
         }
         pub fn print(&self) -> () {

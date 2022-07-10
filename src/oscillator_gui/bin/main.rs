@@ -24,7 +24,7 @@ impl Default for OszilatorGui {
 
 impl eframe::App for OszilatorGui {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        let my_sine = SineWave::new(self.freq, self.freq_am, self.freq_fm, 48000);
+        let my_sine = SineWave::new(self.freq, self.freq_am, self.freq_fm, 48000.0, 48000);
         let (values_size, values_data) = my_sine.get_values();
         self.size = values_size;
         self.wave_data = values_data.clone();
