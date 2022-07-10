@@ -36,7 +36,7 @@ impl eframe::App for OszilatorGui {
         let wave_line = Line::new(Values::from_values_iter(wave));
 
         egui::CentralPanel::default().show(ctx, |ui| {
-            ui.heading("Plot");
+            ui.heading("Oscillator");
             ui.vertical(|ui| {
                 ui.horizontal(|ui| {
                     ui.label("Freq Base: ");
