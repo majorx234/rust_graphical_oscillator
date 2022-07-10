@@ -5,6 +5,7 @@ use oscillator_lib::wave_gen::SineWave;
 struct OszilatorGui {
     size: usize,
     wave_data: std::vec::Vec<f32>,
+    freq: f32,
 }
 
 impl Default for OszilatorGui {
@@ -12,12 +13,17 @@ impl Default for OszilatorGui {
         Self {
             size: 0,
             wave_data: Vec::new(),
+            freq: 44.0,
         }
     }
 }
 
 impl eframe::App for OszilatorGui {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        let my_sine = SineWave::new(self.freq as u32, 48000);
+        let (values_size, values_data) = my_sine.get_values();
+        self.size = values_size;
+        self.wave_data = values_data.clone();
         let wave = (0..self.size).map(|i| {
             let x = i as f64;
             Value::new(x, self.wave_data[i] as f64)
@@ -37,11 +43,10 @@ impl eframe::App for OszilatorGui {
 }
 
 fn main() {
-    let my_sine = SineWave::new(44, 48000);
-    let (values_size, values_data) = my_sine.get_values();
     let plot_app = OszilatorGui {
-        wave_data: values_data.clone(),
-        size: values_size,
+        wave_data: Vec::new(),
+        size: 0,
+        freq: 44.0,
     };
     let options = eframe::NativeOptions::default();
     eframe::run_native("Plot App", options, Box::new(|_cc| Box::new(plot_app)));
