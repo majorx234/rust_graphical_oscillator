@@ -19,17 +19,20 @@ pub mod wave_gen {
             fs: f32,
             num_samples: usize,
         ) -> SineWave {
+            let modulator_hub: f32 = 0.001;
+            let modulator_freq: f32 = freq_fm / fs;
+            let modulator_index: f32 = modulator_hub / modulator_freq;
+            let amp = |t: f32, freq_am: f32, fs: f32| -> f32 {
+                0.5 + 0.5 * (2.0 * f32::consts::PI * t * freq_am / fs).cos()
+            };
             let shift = |t: f32, freq_fm: f32, fs: f32| -> f32 {
-                0.11 / freq_fm * (2.0 * f32::consts::PI * t * freq_fm / fs).cos()
+                (2.0 * f32::consts::PI * t * freq_fm / fs).cos()
             };
             let values_data = (0..num_samples)
                 .map(|i| {
-                    ((2.0
-                        * f32::consts::PI
-                        * freq_base
-                        * (i as f32)
-                        * shift(i as f32, freq_fm, fs)
-                        / fs)
+                    amp(i as f32, freq_am, fs)
+                        * ((2.0 * f32::consts::PI * (freq_base / fs) * (i as f32)
+                            + modulator_index * shift(i as f32, freq_fm, fs))
                         .sin())
                 })
                 .collect();
