@@ -9,6 +9,7 @@ struct OszilatorGui {
     freq_am: f32,
     intensity_fm: f32,
     freq_fm: f32,
+    num_samples: usize,
 }
 
 impl Default for OszilatorGui {
@@ -20,6 +21,7 @@ impl Default for OszilatorGui {
             freq_am: 0.0,
             intensity_fm: 1.0,
             freq_fm: 0.0,
+            num_samples: 48000,
         }
     }
 }
@@ -33,7 +35,7 @@ impl eframe::App for OszilatorGui {
             self.intensity_fm,
             self.freq_fm,
             48000.0,
-            48000,
+            self.num_samples,
         );
         let (values_size, values_data) = my_sine.get_values();
         self.size = values_size;
@@ -47,6 +49,10 @@ impl eframe::App for OszilatorGui {
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.heading("Oscillator");
             ui.vertical(|ui| {
+                ui.horizontal(|ui| {
+                    ui.label("Num Samples: ");
+                    ui.add(egui::DragValue::new(&mut self.num_samples).speed(100.0));
+                });
                 ui.horizontal(|ui| {
                     ui.label("Freq Base: ");
                     ui.add(egui::DragValue::new(&mut self.freq).speed(1.0));
@@ -81,6 +87,7 @@ fn main() {
         freq_am: 0.0,
         intensity_fm: 1.0,
         freq_fm: 0.0,
+        num_samples: 48000,
     };
     let options = eframe::NativeOptions::default();
     eframe::run_native("Oscillator", options, Box::new(|_cc| Box::new(plot_app)));

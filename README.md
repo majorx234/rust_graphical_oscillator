@@ -16,7 +16,6 @@ cargo run
 ```
 
 # ToDo 
-- add parameter for wavelength
 - add paramter for samplerate
 - add envelope
 - add wav-file export
