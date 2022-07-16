@@ -1,6 +1,8 @@
 use eframe::egui;
 use eframe::egui::plot::{Line, Plot, Value, Values};
 use oscillator_lib::wave_gen::SineWave;
+use std::sync::mpsc;
+use std::{thread, time::Duration};
 
 struct OszilatorGui {
     size: usize,
@@ -10,6 +12,7 @@ struct OszilatorGui {
     intensity_fm: f32,
     freq_fm: f32,
     num_samples: usize,
+    tx: Option<std::sync::mpsc::Sender<bool>>,
 }
 
 impl Default for OszilatorGui {
@@ -22,6 +25,7 @@ impl Default for OszilatorGui {
             intensity_fm: 1.0,
             freq_fm: 0.0,
             num_samples: 48000,
+            tx: None,
         }
     }
 }
@@ -74,12 +78,26 @@ impl eframe::App for OszilatorGui {
                         .view_aspect(2.0)
                         .show(ui, |plot_ui| plot_ui.line(wave_line));
                 });
+                ui.horizontal(|ui| {
+                    if ui.button("close").clicked() {
+                        match &self.tx {
+                            Some(x) => {
+                                x.send(false).unwrap();
+                            }
+                            None => {
+                                println!("No tx\n");
+                            }
+                        }
+                    }
+                })
             });
         });
     }
 }
 
 fn main() {
+    let (tx, rx) = mpsc::channel();
+    let audio_thread = start_audio_thread(rx);
     let plot_app = OszilatorGui {
         size: 0,
         freq: 44.0,
@@ -88,7 +106,20 @@ fn main() {
         intensity_fm: 1.0,
         freq_fm: 0.0,
         num_samples: 48000,
+        tx: Some(tx),
     };
     let options = eframe::NativeOptions::default();
     eframe::run_native("Oscillator", options, Box::new(|_cc| Box::new(plot_app)));
+    audio_thread.join().unwrap();
+}
+
+fn start_audio_thread(rx: std::sync::mpsc::Receiver<bool>) -> std::thread::JoinHandle<()> {
+    thread::spawn(move || {
+        let mut run: bool = true;
+        while run {
+            thread::sleep(Duration::from_millis(1000));
+            run = rx.recv().unwrap();
+            println!("running: {}", run);
+        }
+    })
 }
