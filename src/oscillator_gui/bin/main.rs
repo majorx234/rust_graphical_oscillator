@@ -43,7 +43,7 @@ fn start_audio_thread(rx: std::sync::mpsc::Receiver<bool>) -> std::thread::JoinH
             let out_a_p = out_a.as_mut_slice(ps);
             let out_b_p = out_b.as_mut_slice(ps);
 
-            // Use the overdrive to process samples
+            // Use the sine_wave_generator to process samples
             //sine_wave_generator.process_samples(out_a_p, out_b_p);
 
             jack::Control::Continue

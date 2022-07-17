@@ -9,6 +9,7 @@ pub mod wave_gen {
         intensity_fm: f32,
         freq_fm: f32,
         num_samples: usize,
+        offset: usize,
         values: Vec<f32>,
         fs: f32,
     }
@@ -22,6 +23,7 @@ pub mod wave_gen {
             freq_fm: f32,
             fs: f32,
             num_samples: usize,
+            offset: usize,
         ) -> SineWave {
             let modulator_hub: f32 = intensity_fm;
             let modulator_freq: f32 = freq_fm;
@@ -33,7 +35,7 @@ pub mod wave_gen {
             let shift = |t: f32, freq_fm: f32, fs: f32| -> f32 {
                 (2.0 * f32::consts::PI * t * freq_fm / fs).cos()
             };
-            let values_data = (0..num_samples)
+            let values_data = (offset..(offset + num_samples))
                 .map(|i| {
                     amp(i as f32, freq_am, fs)
                         * ((2.0 * f32::consts::PI * (freq_base / fs) * (i as f32)
@@ -48,6 +50,7 @@ pub mod wave_gen {
                 intensity_fm: intensity_fm,
                 freq_fm: freq_fm,
                 num_samples: num_samples,
+                offset: offset,
                 values: values_data,
                 fs: fs,
             };

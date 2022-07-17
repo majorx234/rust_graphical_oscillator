@@ -39,6 +39,7 @@ impl eframe::App for OscillatorGui {
             self.freq_fm,
             48000.0,
             self.num_samples,
+            0,
         );
         let (values_size, values_data) = my_sine.get_values();
         self.size = values_size;
