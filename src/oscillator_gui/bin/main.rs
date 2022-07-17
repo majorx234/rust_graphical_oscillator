@@ -1,5 +1,6 @@
 use eframe::egui;
 use eframe::egui::plot::{Line, Plot, Value, Values};
+extern crate jack;
 use oscillator_lib::wave_gen::SineWave;
 use std::sync::mpsc;
 use std::{thread, time::Duration};
@@ -115,11 +116,39 @@ fn main() {
 
 fn start_audio_thread(rx: std::sync::mpsc::Receiver<bool>) -> std::thread::JoinHandle<()> {
     thread::spawn(move || {
+        let (client, _status) =
+            jack::Client::new("graphical oscillator", jack::ClientOptions::NO_START_SERVER)
+                .unwrap();
+
+        // register ports
+        let mut out_a = client
+            .register_port("gosci_out_l", jack::AudioOut::default())
+            .unwrap();
+        let mut out_b = client
+            .register_port("gosci_out_r", jack::AudioOut::default())
+            .unwrap();
+
+        // sinewave generator
+        // let sine_wave_generator
+
+        let process_callback = move |_: &jack::Client, ps: &jack::ProcessScope| -> jack::Control {
+            let out_a_p = out_a.as_mut_slice(ps);
+            let out_b_p = out_b.as_mut_slice(ps);
+
+            // Use the overdrive to process samples
+            //sine_wave_generator.process_samples(out_a_p, out_b_p);
+
+            jack::Control::Continue
+        };
+        let process = jack::ClosureProcessHandler::new(process_callback);
+        let active_client = client.activate_async((), process).unwrap();
+
         let mut run: bool = true;
         while run {
-            thread::sleep(Duration::from_millis(1000));
+            thread::sleep(Duration::from_millis(100));
             run = rx.recv().unwrap();
             println!("running: {}", run);
         }
+        active_client.deactivate().unwrap();
     })
 }

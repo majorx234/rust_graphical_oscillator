@@ -15,3 +15,4 @@ path = "src/oscillator_gui/bin/main.rs"
 [dependencies]
 eframe = { version = "0.18.0"}
 scan_fmt = "0.2.6"
+jack = "0.10.0"
