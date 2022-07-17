@@ -41,7 +41,7 @@ impl eframe::App for OscillatorGui {
             self.num_samples,
             0,
         );
-        let (values_size, values_data) = my_sine.get_values();
+        let (values_size, values_data) = my_sine.gen_values();
         self.size = values_size;
         let wave = (0..self.size).map(|i| {
             let x = i as f64;
