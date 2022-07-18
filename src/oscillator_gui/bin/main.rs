@@ -8,7 +8,6 @@ fn main() {
     let (tx, rx) = mpsc::channel();
     let audio_thread = start_audio_thread(rx);
     let plot_app = OscillatorGui {
-        size: 0,
         freq: 44.0,
         intensity_am: 1.0,
         freq_am: 0.0,
@@ -36,6 +35,8 @@ fn start_audio_thread(rx: std::sync::mpsc::Receiver<bool>) -> std::thread::JoinH
             .register_port("gosci_out_r", jack::AudioOut::default())
             .unwrap();
 
+        // get frame size
+        let frame_size = client.buffer_size();
         // sinewave generator
         // let sine_wave_generator
 
