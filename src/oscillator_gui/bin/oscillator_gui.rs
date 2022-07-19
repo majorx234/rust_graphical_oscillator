@@ -1,7 +1,7 @@
+use crate::ctrl_msg::CtrlMsg;
 use eframe::egui;
 use eframe::egui::plot::{Line, Plot, Value, Values};
 use oscillator_lib::wave_gen::SineWave;
-use std::sync::mpsc;
 
 pub struct OscillatorGui {
     pub freq: f32,
@@ -10,7 +10,8 @@ pub struct OscillatorGui {
     pub intensity_fm: f32,
     pub freq_fm: f32,
     pub num_samples: usize,
-    pub tx: Option<std::sync::mpsc::Sender<bool>>,
+    pub tx_close: Option<std::sync::mpsc::Sender<bool>>,
+    pub tx_ctrl: Option<std::sync::mpsc::Sender<CtrlMsg>>,
 }
 
 impl Default for OscillatorGui {
@@ -22,7 +23,8 @@ impl Default for OscillatorGui {
             intensity_fm: 1.0,
             freq_fm: 0.0,
             num_samples: 48000,
-            tx: None,
+            tx_close: None,
+            tx_ctrl: None,
         }
     }
 }
@@ -39,6 +41,24 @@ impl eframe::App for OscillatorGui {
             self.num_samples,
             0,
         );
+
+        let msg = CtrlMsg {
+            size: 1024,
+            freq: self.freq,
+            intensity_am: self.intensity_am,
+            freq_am: self.freq_am,
+            intensity_fm: self.intensity_fm,
+            freq_fm: self.freq_fm,
+            num_samples: self.num_samples,
+        };
+        match &self.tx_ctrl {
+            Some(x) => {
+                x.send(msg).unwrap();
+            }
+            None => {
+                println!("No tx_ctrl\n");
+            }
+        }
         let (values_size, values_data) = my_sine.gen_values();
         let wave = (0..values_size).map(|i| {
             let x = i as f64;
@@ -77,12 +97,12 @@ impl eframe::App for OscillatorGui {
                 });
                 ui.horizontal(|ui| {
                     if ui.button("close").clicked() {
-                        match &self.tx {
+                        match &self.tx_close {
                             Some(x) => {
                                 x.send(false).unwrap();
                             }
                             None => {
-                                println!("No tx\n");
+                                println!("No tx_close\n");
                             }
                         }
                     }
