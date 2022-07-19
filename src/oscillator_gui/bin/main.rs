@@ -50,7 +50,7 @@ fn start_audio_thread(
         let frame_size = client.buffer_size();
         // sinewave generator
         let mut sine_wave_generator = SineWaveGenerator::new(frame_size as u32);
-        let msg = CtrlMsg {
+        let mut msg = CtrlMsg {
             size: 0,
             freq: 0.0,
             intensity_am: 0.0,
@@ -63,11 +63,11 @@ fn start_audio_thread(
         let process_callback = move |_: &jack::Client, ps: &jack::ProcessScope| -> jack::Control {
             let out_a_p = out_a.as_mut_slice(ps);
             let out_b_p = out_b.as_mut_slice(ps);
-            /*
-                        match rx_ctrl.try_recv() {
+
+            match rx_ctrl.try_recv() {
                 Ok(rx) => msg = rx,
                 Err(_) => {}
-            };*/
+            };
             // Use the sine_wave_generator to process samples
             sine_wave_generator.ctrl(&msg);
             sine_wave_generator.process_samples(out_a_p, out_b_p);
