@@ -37,7 +37,7 @@ fn start_audio_thread(
         let (client, _status) =
             jack::Client::new("graphical oscillator", jack::ClientOptions::NO_START_SERVER)
                 .unwrap();
-
+        let sample_rate = client.sample_rate();
         // register ports
         let mut out_a = client
             .register_port("gosci_out_l", jack::AudioOut::default())
@@ -49,7 +49,7 @@ fn start_audio_thread(
         // get frame size
         let frame_size = client.buffer_size();
         // sinewave generator
-        let mut sine_wave_generator = SineWaveGenerator::new(frame_size as u32);
+        let mut sine_wave_generator = SineWaveGenerator::new(frame_size as u32, sample_rate as f32);
         let mut msg = CtrlMsg {
             size: 0,
             freq: 0.0,

@@ -17,7 +17,6 @@ cargo run
 
 # ToDo 
 - put wave generation in extra thread and copy data via ring buffer
-- let paramter for samplerate be configured by jack settings
 - add hull curve envelope and triggering via button
 - add wav-file export
 - add triggering via midi

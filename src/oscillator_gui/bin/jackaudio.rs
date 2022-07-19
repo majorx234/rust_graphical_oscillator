@@ -10,10 +10,11 @@ pub struct SineWaveGenerator {
     pub freq_fm: f32,
     pub offset: usize,
     pub frame_size: u32,
+    pub fs: f32,
 }
 
 impl Wave for SineWaveGenerator {
-    fn new(frame_size: u32) -> Self {
+    fn new(frame_size: u32, sample_rate: f32) -> Self {
         SineWaveGenerator {
             freq: 0.0,
             intensity_am: 0.0,
@@ -22,6 +23,7 @@ impl Wave for SineWaveGenerator {
             freq_fm: 0.0,
             offset: 0,
             frame_size: frame_size,
+            fs: sample_rate,
         }
     }
 
@@ -33,7 +35,7 @@ impl Wave for SineWaveGenerator {
             self.freq_am,
             self.intensity_fm,
             self.freq_fm,
-            48000.0,
+            self.fs,
             self.frame_size as usize,
             self.offset,
         );
