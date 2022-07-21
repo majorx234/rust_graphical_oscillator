@@ -54,6 +54,5 @@ impl Wave for SineWaveGenerator {
         self.freq_am = msg.freq_am;
         self.intensity_fm = msg.intensity_fm;
         self.freq_fm = msg.freq_fm;
-        self.offset = 0;
     }
 }
