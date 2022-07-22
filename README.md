@@ -5,6 +5,9 @@
 - learning signal processing 
 - learning egui 
 
+# screenshot
+![Screenshot](docs/images/screenshot.png "Screenshot of Oscillator GUI")
+
 # dependencies
 You need JACK Audio Connection Kit and tools like qjackctl (see jackaudio.org)
 
