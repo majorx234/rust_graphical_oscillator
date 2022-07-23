@@ -49,7 +49,7 @@ pub mod wave_gen {
             };
             let values: Vec<f32> = (self.offset..(self.offset + self.num_samples))
                 .map(|i| {
-                    amp(i as f32, self.freq_am, self.fs)
+                    (amp(i as f32, self.freq_am, self.fs) + (1.0 - self.intensity_am))
                         * ((2.0 * f32::consts::PI * (self.freq_base / self.fs) * (i as f32)
                             + modulator_index * shift(i as f32, self.freq_fm, self.fs))
                         .sin())
