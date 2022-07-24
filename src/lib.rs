@@ -46,8 +46,8 @@ pub mod wave_gen {
             let modulator_hub: f32 = self.intensity_fm;
             let modulator_freq: f32 = self.freq_fm;
             let modulator_index: f32 = modulator_hub / modulator_freq;
-            let phase_am: f32 = self.phase_am / self.fs;
-            let phase_fm: f32 = self.phase_fm / self.fs;
+            let phase_am: f32 = self.phase_am;
+            let phase_fm: f32 = self.phase_fm;
             let amp = |t: f32, freq_am: f32, fs: f32| -> f32 {
                 0.5 * (self.intensity_am
                     + self.intensity_am
