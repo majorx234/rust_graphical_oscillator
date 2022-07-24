@@ -41,13 +41,14 @@ pub mod wave_gen {
             let modulator_freq: f32 = self.freq_fm;
             let modulator_index: f32 = modulator_hub / modulator_freq;
             let phase_am: f32 = 0.0 / self.fs;
+            let phase_fm: f32 = 0.0 / self.fs;
             let amp = |t: f32, freq_am: f32, fs: f32| -> f32 {
                 0.5 * (self.intensity_am
                     + self.intensity_am
                         * (2.0 * f32::consts::PI * t * freq_am / fs + phase_am).cos())
             };
             let shift = |t: f32, freq_fm: f32, fs: f32| -> f32 {
-                (2.0 * f32::consts::PI * t * freq_fm / fs).cos()
+                (2.0 * f32::consts::PI * t * freq_fm / fs + phase_fm).cos()
             };
             let values: Vec<f32> = (self.offset..(self.offset + self.num_samples))
                 .map(|i| {
