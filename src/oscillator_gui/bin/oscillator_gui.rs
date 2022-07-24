@@ -49,8 +49,10 @@ impl eframe::App for OscillatorGui {
             freq: self.freq,
             intensity_am: self.intensity_am,
             freq_am: self.freq_am,
+            phase_am: 0.0,
             intensity_fm: self.intensity_fm,
             freq_fm: self.freq_fm,
+            phase_fm: 0.0,
             num_samples: self.num_samples,
         };
         match &self.tx_ctrl {

@@ -55,8 +55,10 @@ fn start_audio_thread(
             freq: 0.0,
             intensity_am: 0.0,
             freq_am: 0.0,
+            phase_am: 0.0,
             intensity_fm: 0.0,
             freq_fm: 0.0,
+            phase_fm: 0.0,
             num_samples: frame_size as usize,
         };
 
