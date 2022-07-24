@@ -6,8 +6,10 @@ pub mod wave_gen {
         freq_base: f32,
         intensity_am: f32,
         freq_am: f32,
+        phase_am: f32,
         intensity_fm: f32,
         freq_fm: f32,
+        phase_fm: f32,
         num_samples: usize,
         offset: usize,
         fs: f32,
@@ -18,8 +20,10 @@ pub mod wave_gen {
             freq_base: f32,
             intensity_am: f32,
             freq_am: f32,
+            phase_am: f32,
             intensity_fm: f32,
             freq_fm: f32,
+            phase_fm: f32,
             fs: f32,
             num_samples: usize,
             offset: usize,
@@ -28,8 +32,10 @@ pub mod wave_gen {
                 freq_base: freq_base,
                 intensity_am: intensity_am,
                 freq_am: freq_am,
+                phase_am: phase_am,
                 intensity_fm: intensity_fm,
                 freq_fm: freq_fm,
+                phase_fm: phase_fm,
                 num_samples: num_samples,
                 offset: offset,
                 fs: fs,
@@ -40,8 +46,8 @@ pub mod wave_gen {
             let modulator_hub: f32 = self.intensity_fm;
             let modulator_freq: f32 = self.freq_fm;
             let modulator_index: f32 = modulator_hub / modulator_freq;
-            let phase_am: f32 = 0.0 / self.fs;
-            let phase_fm: f32 = 0.0 / self.fs;
+            let phase_am: f32 = self.phase_am / self.fs;
+            let phase_fm: f32 = self.phase_fm / self.fs;
             let amp = |t: f32, freq_am: f32, fs: f32| -> f32 {
                 0.5 * (self.intensity_am
                     + self.intensity_am
