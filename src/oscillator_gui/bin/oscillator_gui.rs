@@ -7,8 +7,10 @@ pub struct OscillatorGui {
     pub freq: f32,
     pub intensity_am: f32,
     pub freq_am: f32,
+    pub phase_am: f32,
     pub intensity_fm: f32,
     pub freq_fm: f32,
+    pub phase_fm: f32,
     pub num_samples: usize,
     pub tx_close: Option<std::sync::mpsc::Sender<bool>>,
     pub tx_ctrl: Option<std::sync::mpsc::Sender<CtrlMsg>>,
@@ -20,8 +22,10 @@ impl Default for OscillatorGui {
             freq: 44.0,
             intensity_am: 1.0,
             freq_am: 0.0,
+            phase_am: 0.0,
             intensity_fm: 1.0,
             freq_fm: 0.0,
+            phase_fm: 0.0,
             num_samples: 48000,
             tx_close: None,
             tx_ctrl: None,
@@ -49,10 +53,10 @@ impl eframe::App for OscillatorGui {
             freq: self.freq,
             intensity_am: self.intensity_am,
             freq_am: self.freq_am,
-            phase_am: 0.0,
+            phase_am: self.phase_am,
             intensity_fm: self.intensity_fm,
             freq_fm: self.freq_fm,
-            phase_fm: 0.0,
+            phase_fm: self.phase_fm,
             num_samples: self.num_samples,
         };
         match &self.tx_ctrl {
@@ -89,11 +93,20 @@ impl eframe::App for OscillatorGui {
                     ui.add(egui::Slider::new(&mut self.freq_am, 0.0..=10.0));
                 });
                 ui.horizontal(|ui| {
+                    ui.label("Phase AM: ");
+                    ui.add(egui::Slider::new(&mut self.phase_am, 0.0..=6.283));
+                });
+                ui.horizontal(|ui| {
                     ui.label("Intensity FM: ");
                     ui.add(egui::Slider::new(&mut self.intensity_fm, 0.0..=100.0));
                     ui.label("Freq FM: ");
                     ui.add(egui::Slider::new(&mut self.freq_fm, 0.0..=10.0));
                 });
+                ui.horizontal(|ui| {
+                    ui.label("Phase AM: ");
+                    ui.add(egui::Slider::new(&mut self.phase_fm, 0.0..=6.283));
+                });
+
                 ui.horizontal(|ui| {
                     Plot::new("my_wave")
                         .view_aspect(2.0)
