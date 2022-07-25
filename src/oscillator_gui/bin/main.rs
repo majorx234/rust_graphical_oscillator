@@ -1,5 +1,6 @@
 extern crate jack;
 use std::sync::mpsc;
+use std::sync::mpsc::sync_channel;
 use std::{thread, time::Duration};
 mod ctrl_msg;
 mod wave;
@@ -7,13 +8,25 @@ use crate::wave::Wave;
 use ctrl_msg::CtrlMsg;
 mod jackaudio;
 use jackaudio::SineWaveGenerator;
+mod jackmidi;
+use jackmidi::MidiMsg;
 mod oscillator_gui;
 use oscillator_gui::OscillatorGui;
 
 fn main() {
     let (tx_close, rx_close) = mpsc::channel();
     let (tx_ctrl, rx_ctrl) = mpsc::channel();
-    let audio_thread = start_audio_thread(rx_close, rx_ctrl);
+    let (midi_sender, midi_receiver) = mpsc::sync_channel(64);
+
+    // midi msg test thread
+    // TODO: remove later
+    std::thread::spawn(move || {
+        while let Ok(m) = midi_receiver.recv() {
+            println!("{:?}", m);
+        }
+    });
+
+    let audio_thread = start_audio_thread(rx_close, rx_ctrl, midi_sender);
     let plot_app = OscillatorGui {
         freq: 44.0,
         intensity_am: 1.0,
@@ -34,6 +47,7 @@ fn main() {
 fn start_audio_thread(
     rx_close: std::sync::mpsc::Receiver<bool>,
     rx_ctrl: std::sync::mpsc::Receiver<CtrlMsg>,
+    midi_sender: std::sync::mpsc::SyncSender<MidiMsg>,
 ) -> std::thread::JoinHandle<()> {
     thread::spawn(move || {
         let (client, _status) =
@@ -46,6 +60,9 @@ fn start_audio_thread(
             .unwrap();
         let mut out_b = client
             .register_port("gosci_out_r", jack::AudioOut::default())
+            .unwrap();
+        let midi_in = client
+            .register_port("gosci_midi_in", jack::MidiIn::default())
             .unwrap();
 
         // get frame size
@@ -65,6 +82,11 @@ fn start_audio_thread(
         };
 
         let process_callback = move |_: &jack::Client, ps: &jack::ProcessScope| -> jack::Control {
+            let show_p = midi_in.iter(ps);
+            for e in show_p {
+                let c: MidiMsg = e.into();
+                let _ = midi_sender.try_send(c);
+            }
             let out_a_p = out_a.as_mut_slice(ps);
             let out_b_p = out_b.as_mut_slice(ps);
 
