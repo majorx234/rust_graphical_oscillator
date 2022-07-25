@@ -32,7 +32,6 @@ impl Wave for SineWaveGenerator {
     }
 
     fn process_samples(&mut self, output_l: &mut [f32], output_r: &mut [f32]) {
-        let i: usize = 0;
         let my_sine = SineWave::new(
             self.freq,
             self.intensity_am,
