@@ -27,7 +27,7 @@ fn main() {
     });
 
     let audio_thread = start_audio_thread(rx_close, rx_ctrl, midi_sender);
-    let plot_app = OscillatorGui {
+    let graphical_osci_app = OscillatorGui {
         freq: 44.0,
         intensity_am: 1.0,
         freq_am: 0.0,
@@ -40,7 +40,11 @@ fn main() {
         tx_ctrl: Some(tx_ctrl),
     };
     let options = eframe::NativeOptions::default();
-    eframe::run_native("Oscillator", options, Box::new(|_cc| Box::new(plot_app)));
+    eframe::run_native(
+        "Oscillator",
+        options,
+        Box::new(|_cc| Box::new(graphical_osci_app)),
+    );
     audio_thread.join().unwrap();
 }
 
