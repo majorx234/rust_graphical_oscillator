@@ -1,4 +1,7 @@
 extern crate jack;
+extern crate wmidi;
+use std::convert::TryFrom;
+use std::convert::TryInto;
 use std::sync::mpsc;
 use std::sync::mpsc::sync_channel;
 use std::{thread, time::Duration};
@@ -10,18 +13,29 @@ mod jackaudio;
 use jackaudio::SineWaveGenerator;
 mod jackmidi;
 use jackmidi::MidiMsg;
+use wmidi::MidiMessage;
 mod oscillator_gui;
 use oscillator_gui::OscillatorGui;
 
 fn main() {
     let (tx_close, rx_close) = mpsc::channel();
     let (tx_ctrl, rx_ctrl) = mpsc::channel();
-    let (midi_sender, midi_receiver) = mpsc::sync_channel(64);
+    let (midi_sender, midi_receiver): (
+        std::sync::mpsc::SyncSender<MidiMsg>,
+        std::sync::mpsc::Receiver<MidiMsg>,
+    ) = mpsc::sync_channel(64);
 
     // midi msg test thread
     // TODO: remove later
     std::thread::spawn(move || {
         while let Ok(m) = midi_receiver.recv() {
+            let bytes: &[u8] = &m.data;
+            let message = wmidi::MidiMessage::try_from(bytes);
+
+            if let Ok(wmidi::MidiMessage::NoteOn(_, note, val)) = message {
+                let volume = u8::from(val) as f32 / 127.0;
+                println!("Singing {} at volume {}", note, volume);
+            }
             println!("{:?}", m);
         }
     });

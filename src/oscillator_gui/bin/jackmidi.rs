@@ -6,9 +6,9 @@ const MAX_MIDI: usize = 3;
 //a fixed size container to copy data out of real-time thread
 #[derive(Copy, Clone)]
 pub struct MidiMsg {
-    len: usize,
-    data: [u8; MAX_MIDI],
-    time: jack::Frames,
+    pub len: usize,
+    pub data: [u8; MAX_MIDI],
+    pub time: jack::Frames,
 }
 
 impl From<jack::RawMidi<'_>> for MidiMsg {
