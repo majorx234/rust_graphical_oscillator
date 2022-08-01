@@ -110,6 +110,7 @@ impl eframe::App for OscillatorGui {
                 ui.horizontal(|ui| {
                     Plot::new("my_wave")
                         .view_aspect(2.0)
+                        .data_aspect(self.num_samples as f32 / 4.0)
                         .show(ui, |plot_ui| plot_ui.line(wave_line));
                 });
                 ui.horizontal(|ui| {
