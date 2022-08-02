@@ -14,6 +14,7 @@ pub struct OscillatorGui {
     pub num_samples: usize,
     pub tx_close: Option<std::sync::mpsc::Sender<bool>>,
     pub tx_ctrl: Option<std::sync::mpsc::Sender<CtrlMsg>>,
+    pub rx_note_volume: Option<std::sync::mpsc::Receiver<(f32, f32)>>,
 }
 
 impl Default for OscillatorGui {
@@ -29,6 +30,7 @@ impl Default for OscillatorGui {
             num_samples: 48000,
             tx_close: None,
             tx_ctrl: None,
+            rx_note_volume: None,
         }
     }
 }
