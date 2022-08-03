@@ -49,7 +49,17 @@ impl eframe::App for OscillatorGui {
             self.num_samples,
             0,
         );
-
+        let mut volume: f32 = 0.0;
+        match &self.rx_note_volume {
+            Some(note_volume) => match note_volume.try_recv() {
+                Ok((note, vol)) => {
+                    self.freq = note;
+                    volume = vol;
+                }
+                Err(_) => {}
+            },
+            None => {}
+        }
         let msg = CtrlMsg {
             size: 1024,
             freq: self.freq,
