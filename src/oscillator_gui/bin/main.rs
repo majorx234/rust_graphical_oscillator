@@ -1,5 +1,6 @@
 extern crate jack;
 extern crate wmidi;
+use crossbeam_channel::{unbounded, Receiver, Sender};
 use std::convert::TryFrom;
 use std::convert::TryInto;
 use std::sync::mpsc;
@@ -18,7 +19,8 @@ mod oscillator_gui;
 use oscillator_gui::OscillatorGui;
 
 fn main() {
-    let (tx_close, rx_close) = mpsc::channel();
+    let (tx_close, rx1_close) = unbounded();
+    let rx2_close = rx1_close.clone();
     let (tx_ctrl, rx_ctrl) = mpsc::channel();
     let (tx_note_volume, rx_note_volume): (
         std::sync::mpsc::Sender<(f32, f32)>,
@@ -43,10 +45,16 @@ fn main() {
                 println!("Singing {} at volume {}", note, volume);
             }
             println!("{:?}", m);
+            let mut run = true;
+            run = rx1_close.try_recv().unwrap();
+            if !run {
+                break;
+            }
         }
+        println!("exit midi thread\n");
     });
 
-    let audio_thread = start_audio_thread(rx_close, rx_ctrl, midi_sender);
+    let audio_thread = start_audio_thread(rx2_close, rx_ctrl, midi_sender);
     let graphical_osci_app = OscillatorGui {
         freq: 44.0,
         intensity_am: 1.0,
@@ -72,7 +80,7 @@ fn main() {
 }
 
 fn start_audio_thread(
-    rx_close: std::sync::mpsc::Receiver<bool>,
+    rx_close: crossbeam_channel::Receiver<bool>,
     rx_ctrl: std::sync::mpsc::Receiver<CtrlMsg>,
     midi_sender: std::sync::mpsc::SyncSender<MidiMsg>,
 ) -> std::thread::JoinHandle<()> {
@@ -134,8 +142,8 @@ fn start_audio_thread(
         while run {
             thread::sleep(Duration::from_millis(100));
             run = rx_close.recv().unwrap();
-            println!("running: {}", run);
         }
+        println!("exit audio thread\n");
         active_client.deactivate().unwrap();
     })
 }

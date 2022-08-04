@@ -12,7 +12,7 @@ pub struct OscillatorGui {
     pub freq_fm: f32,
     pub phase_fm: f32,
     pub num_samples: usize,
-    pub tx_close: Option<std::sync::mpsc::Sender<bool>>,
+    pub tx_close: Option<crossbeam_channel::Sender<bool>>,
     pub tx_ctrl: Option<std::sync::mpsc::Sender<CtrlMsg>>,
     pub rx_note_volume: Option<std::sync::mpsc::Receiver<(f32, f32)>>,
 }
@@ -130,6 +130,7 @@ impl eframe::App for OscillatorGui {
                         match &self.tx_close {
                             Some(x) => {
                                 x.send(false).unwrap();
+                                _frame.quit();
                             }
                             None => {
                                 println!("No tx_close\n");
