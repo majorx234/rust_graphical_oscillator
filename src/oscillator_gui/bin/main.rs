@@ -31,7 +31,7 @@ fn main() {
 
     // midi msg test thread
     // TODO: remove later
-    std::thread::spawn(move || {
+    let midi_thread: std::thread::JoinHandle<()> = std::thread::spawn(move || {
         while let Ok(m) = midi_receiver.recv() {
             let bytes: &[u8] = &m.data;
             let message = wmidi::MidiMessage::try_from(bytes);
@@ -66,6 +66,8 @@ fn main() {
         options,
         Box::new(|_cc| Box::new(graphical_osci_app)),
     );
+
+    midi_thread.join().unwrap();
     audio_thread.join().unwrap();
 }
 
@@ -74,7 +76,7 @@ fn start_audio_thread(
     rx_ctrl: std::sync::mpsc::Receiver<CtrlMsg>,
     midi_sender: std::sync::mpsc::SyncSender<MidiMsg>,
 ) -> std::thread::JoinHandle<()> {
-    thread::spawn(move || {
+    std::thread::spawn(move || {
         let (client, _status) =
             jack::Client::new("graphical oscillator", jack::ClientOptions::NO_START_SERVER)
                 .unwrap();
