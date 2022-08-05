@@ -2,9 +2,7 @@ extern crate jack;
 extern crate wmidi;
 use crossbeam_channel::{unbounded, Receiver, Sender};
 use std::convert::TryFrom;
-use std::convert::TryInto;
 use std::sync::mpsc;
-use std::sync::mpsc::sync_channel;
 use std::{thread, time::Duration};
 mod ctrl_msg;
 mod wave;
@@ -14,7 +12,6 @@ mod jackaudio;
 use jackaudio::SineWaveGenerator;
 mod jackmidi;
 use jackmidi::MidiMsg;
-use wmidi::MidiMessage;
 mod oscillator_gui;
 use oscillator_gui::OscillatorGui;
 
