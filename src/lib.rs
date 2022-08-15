@@ -45,7 +45,12 @@ pub mod wave_gen {
         pub fn gen_values(&self) -> (usize, std::vec::Vec<f32>) {
             let modulator_hub: f32 = self.intensity_fm;
             let modulator_freq: f32 = self.freq_fm;
-            let modulator_index: f32 = modulator_hub / modulator_freq;
+            let modulator_index: f32 = if self.freq_fm == 0.0 {
+                0.0
+            } else {
+                modulator_hub / modulator_freq
+            };
+
             let phase_am: f32 = self.phase_am;
             let phase_fm: f32 = self.phase_fm;
             let amp = |t: f32, freq_am: f32, fs: f32| -> f32 {
