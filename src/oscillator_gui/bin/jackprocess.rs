@@ -7,7 +7,7 @@ use crate::wave::Wave;
 use crossbeam_channel::Receiver;
 use std::{thread, time::Duration};
 
-pub fn start_jack_processing_thread(
+pub fn start_jack_thread(
     rx_close: crossbeam_channel::Receiver<bool>,
     rx_ctrl: std::sync::mpsc::Receiver<CtrlMsg>,
     midi_sender: std::sync::mpsc::SyncSender<MidiMsg>,

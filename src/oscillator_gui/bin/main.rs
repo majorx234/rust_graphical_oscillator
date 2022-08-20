@@ -11,7 +11,7 @@ mod jackmidi;
 use jackmidi::MidiMsg;
 mod jackaudio;
 mod jackprocess;
-use jackprocess::start_jack_processing_thread;
+use jackprocess::start_jack_thread;
 
 fn main() {
     let (tx_close, rx1_close) = unbounded();
@@ -49,7 +49,7 @@ fn main() {
         println!("exit midi thread\n");
     });
 
-    let audio_thread = start_jack_processing_thread(rx2_close, rx_ctrl, midi_sender);
+    let jack_thread = start_jack_thread(rx2_close, rx_ctrl, midi_sender);
     let graphical_osci_app = OscillatorGui {
         freq: 44.0,
         intensity_am: 1.0,
@@ -71,5 +71,5 @@ fn main() {
     );
 
     midi_thread.join().unwrap();
-    audio_thread.join().unwrap();
+    jack_thread.join().unwrap();
 }
