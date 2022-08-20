@@ -51,7 +51,7 @@ fn main() {
         println!("exit midi thread\n");
     });
 
-    let audio_thread = start_audio_thread(rx2_close, rx_ctrl, midi_sender);
+    let audio_thread = start_jack_processing_thread(rx2_close, rx_ctrl, midi_sender);
     let graphical_osci_app = OscillatorGui {
         freq: 44.0,
         intensity_am: 1.0,
@@ -76,7 +76,7 @@ fn main() {
     audio_thread.join().unwrap();
 }
 
-fn start_audio_thread(
+fn start_jack_processing_thread(
     rx_close: crossbeam_channel::Receiver<bool>,
     rx_ctrl: std::sync::mpsc::Receiver<CtrlMsg>,
     midi_sender: std::sync::mpsc::SyncSender<MidiMsg>,
