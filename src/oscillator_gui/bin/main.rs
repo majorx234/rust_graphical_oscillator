@@ -17,6 +17,7 @@ fn main() {
     let (tx_close, rx1_close) = unbounded();
     let rx2_close = rx1_close.clone();
     let (tx_ctrl, rx_ctrl) = mpsc::channel();
+    let (tx_trigger, rx_trigger) = mpsc::channel();
     let (tx_note_volume, rx_note_volume): (
         std::sync::mpsc::Sender<(f32, f32)>,
         std::sync::mpsc::Receiver<(f32, f32)>,
@@ -61,6 +62,7 @@ fn main() {
         num_samples: 48000,
         tx_close: Some(tx_close),
         tx_ctrl: Some(tx_ctrl),
+        tx_trigger: Some(tx_trigger),
         rx_note_volume: Some(rx_note_volume),
     };
     let options = eframe::NativeOptions::default();

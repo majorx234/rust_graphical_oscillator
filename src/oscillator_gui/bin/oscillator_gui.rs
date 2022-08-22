@@ -14,6 +14,7 @@ pub struct OscillatorGui {
     pub num_samples: usize,
     pub tx_close: Option<crossbeam_channel::Sender<bool>>,
     pub tx_ctrl: Option<std::sync::mpsc::Sender<CtrlMsg>>,
+    pub tx_trigger: Option<std::sync::mpsc::Sender<()>>,
     pub rx_note_volume: Option<std::sync::mpsc::Receiver<(f32, f32)>>,
 }
 
@@ -30,6 +31,7 @@ impl Default for OscillatorGui {
             num_samples: 48000,
             tx_close: None,
             tx_ctrl: None,
+            tx_trigger: None,
             rx_note_volume: None,
         }
     }
@@ -126,6 +128,14 @@ impl eframe::App for OscillatorGui {
                         .show(ui, |plot_ui| plot_ui.line(wave_line));
                 });
                 ui.horizontal(|ui| {
+                    if ui.button("trigger").clicked() {
+                        match &self.tx_trigger {
+                            Some(x) => {
+                                x.send(()).unwrap();
+                            }
+                            None => {}
+                        }
+                    }
                     if ui.button("close").clicked() {
                         match &self.tx_close {
                             Some(x) => {
