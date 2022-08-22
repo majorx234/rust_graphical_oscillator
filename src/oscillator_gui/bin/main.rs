@@ -1,3 +1,4 @@
+extern crate eframe;
 extern crate wmidi;
 use crossbeam_channel::{unbounded, Receiver, Sender};
 use std::convert::TryFrom;
@@ -65,7 +66,9 @@ fn main() {
         tx_trigger: Some(tx_trigger),
         rx_note_volume: Some(rx_note_volume),
     };
-    let options = eframe::NativeOptions::default();
+    let mut options = eframe::NativeOptions::default();
+    let window_size: eframe::egui::Vec2 = eframe::egui::Vec2::new(800.0, 600.0);
+    options.initial_window_size = Some(window_size);
     eframe::run_native(
         "Oscillator",
         options,
