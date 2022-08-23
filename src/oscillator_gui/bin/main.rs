@@ -51,7 +51,7 @@ fn main() {
         println!("exit midi thread\n");
     });
 
-    let jack_thread = start_jack_thread(rx2_close, rx_ctrl, midi_sender);
+    let jack_thread = start_jack_thread(rx2_close, rx_ctrl, rx_trigger, midi_sender);
     let graphical_osci_app = OscillatorGui {
         freq: 44.0,
         intensity_am: 1.0,

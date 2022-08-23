@@ -10,6 +10,7 @@ use std::{thread, time::Duration};
 pub fn start_jack_thread(
     rx_close: crossbeam_channel::Receiver<bool>,
     rx_ctrl: std::sync::mpsc::Receiver<CtrlMsg>,
+    rx_trigger: std::sync::mpsc::Receiver<()>,
     midi_sender: std::sync::mpsc::SyncSender<MidiMsg>,
 ) -> std::thread::JoinHandle<()> {
     std::thread::spawn(move || {
@@ -43,6 +44,10 @@ pub fn start_jack_thread(
             phase_fm: 0.0,
             num_samples: frame_size as usize,
         };
+        let sound_length = 96000; // value of length of a synth sample
+                                  //TODO:  paramter in gui or depending of midi touched key
+
+        let mut triggered: (bool, u32) = (false, 0);
 
         let process_callback = move |_: &jack::Client, ps: &jack::ProcessScope| -> jack::Control {
             let show_p = midi_in.iter(ps);
@@ -57,6 +62,10 @@ pub fn start_jack_thread(
                 Ok(rx) => msg = rx,
                 Err(_) => {}
             };
+            match rx_trigger.try_recv() {
+                Ok(_) => triggered = (true, sound_length.clone()),
+                Err(_) => {}
+            }
             // Use the sine_wave_generator to process samples
             sine_wave_generator.ctrl(&msg);
             sine_wave_generator.process_samples(out_a_p, out_b_p);
