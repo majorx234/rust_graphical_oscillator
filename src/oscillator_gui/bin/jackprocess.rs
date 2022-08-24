@@ -69,6 +69,14 @@ pub fn start_jack_thread(
             // Use the sine_wave_generator to process samples
             sine_wave_generator.ctrl(&msg);
             sine_wave_generator.process_samples(out_a_p, out_b_p);
+            let (playing, play_time): (bool, u32) = triggered;
+            if playing {
+                if play_time > frame_size {
+                    triggered = (true, play_time - frame_size);
+                } else {
+                    triggered = (false, 0);
+                }
+            }
             jack::Control::Continue
         };
 
