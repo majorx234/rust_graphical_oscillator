@@ -48,6 +48,7 @@ pub fn start_jack_thread(
                                   //TODO:  paramter in gui or depending of midi touched key
 
         let mut triggered: (bool, u32) = (false, 0);
+        let mut set_zero: bool = false;
 
         let process_callback = move |_: &jack::Client, ps: &jack::ProcessScope| -> jack::Control {
             let show_p = midi_in.iter(ps);
@@ -73,14 +74,18 @@ pub fn start_jack_thread(
                 sine_wave_generator.ctrl(&msg);
                 sine_wave_generator.process_samples(out_a_p, out_b_p);
             } else {
-                out_a_p.fill(0.0);
-                out_b_p.fill(0.0);
+                if set_zero == true {
+                    out_a_p.fill(0.0);
+                    out_b_p.fill(0.0);
+                    set_zero = false;
+                }
             }
             if playing {
                 if play_time > frame_size {
                     triggered = (true, play_time - frame_size);
                 } else {
                     triggered = (false, 0);
+                    set_zero = true;
                 }
             }
             jack::Control::Continue
