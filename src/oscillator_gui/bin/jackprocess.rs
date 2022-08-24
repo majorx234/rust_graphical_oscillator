@@ -66,10 +66,16 @@ pub fn start_jack_thread(
                 Ok(_) => triggered = (true, sound_length.clone()),
                 Err(_) => {}
             }
-            // Use the sine_wave_generator to process samples
-            sine_wave_generator.ctrl(&msg);
-            sine_wave_generator.process_samples(out_a_p, out_b_p);
             let (playing, play_time): (bool, u32) = triggered;
+
+            // Use the sine_wave_generator to process samples
+            if playing {
+                sine_wave_generator.ctrl(&msg);
+                sine_wave_generator.process_samples(out_a_p, out_b_p);
+            } else {
+                out_a_p.fill(0.0);
+                out_b_p.fill(0.0);
+            }
             if playing {
                 if play_time > frame_size {
                     triggered = (true, play_time - frame_size);
