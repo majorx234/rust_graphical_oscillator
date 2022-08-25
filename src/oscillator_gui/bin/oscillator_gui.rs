@@ -1,4 +1,5 @@
 use crate::ctrl_msg::CtrlMsg;
+use crate::trigger_note_msg::{NoteType, TriggerNoteMsg};
 use eframe::egui;
 use eframe::egui::plot::{Line, Plot, Value, Values};
 use oscillator_lib::wave_gen::SineWave;
@@ -14,7 +15,7 @@ pub struct OscillatorGui {
     pub num_samples: usize,
     pub tx_close: Option<crossbeam_channel::Sender<bool>>,
     pub tx_ctrl: Option<std::sync::mpsc::Sender<CtrlMsg>>,
-    pub tx_trigger: Option<std::sync::mpsc::Sender<()>>,
+    pub tx_trigger: Option<std::sync::mpsc::Sender<TriggerNoteMsg>>,
     pub rx_note_volume: Option<std::sync::mpsc::Receiver<(f32, f32)>>,
 }
 
@@ -131,7 +132,11 @@ impl eframe::App for OscillatorGui {
                     if ui.button("trigger").clicked() {
                         match &self.tx_trigger {
                             Some(x) => {
-                                x.send(()).unwrap();
+                                let trigger_note = TriggerNoteMsg {
+                                    note_type: NoteType::NoteOn,
+                                    freq: self.freq,
+                                };
+                                x.send(trigger_note).unwrap();
                             }
                             None => {}
                         }

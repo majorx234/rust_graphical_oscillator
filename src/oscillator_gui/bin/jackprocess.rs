@@ -4,6 +4,7 @@ use crate::adsr::{adsr_multiplication, generate_adsr_envelope};
 use crate::ctrl_msg::CtrlMsg;
 use crate::jackaudio::SineWaveGenerator;
 use crate::jackmidi::MidiMsg;
+use crate::trigger_note_msg::{NoteType, TriggerNoteMsg};
 use crate::wave::Wave;
 use crossbeam_channel::Receiver;
 use std::{thread, time::Duration};
@@ -11,7 +12,7 @@ use std::{thread, time::Duration};
 pub fn start_jack_thread(
     rx_close: crossbeam_channel::Receiver<bool>,
     rx_ctrl: std::sync::mpsc::Receiver<CtrlMsg>,
-    rx_trigger: std::sync::mpsc::Receiver<()>,
+    rx_trigger: std::sync::mpsc::Receiver<TriggerNoteMsg>,
     midi_sender: std::sync::mpsc::SyncSender<MidiMsg>,
 ) -> std::thread::JoinHandle<()> {
     std::thread::spawn(move || {

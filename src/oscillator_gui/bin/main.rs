@@ -6,6 +6,7 @@ use std::sync::mpsc;
 use std::{thread, time::Duration};
 mod ctrl_msg;
 mod oscillator_gui;
+mod trigger_note_msg;
 mod wave;
 use oscillator_gui::OscillatorGui;
 mod jackmidi;
