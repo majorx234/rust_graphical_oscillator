@@ -3,6 +3,7 @@ use crate::trigger_note_msg::{NoteType, TriggerNoteMsg};
 use eframe::egui;
 use eframe::egui::plot::{Line, Plot, Value, Values};
 use oscillator_lib::wave_gen::SineWave;
+use std::{thread, time};
 
 pub struct OscillatorGui {
     pub freq: f32,
@@ -138,6 +139,17 @@ impl eframe::App for OscillatorGui {
                                     velocity: 0.0,
                                 };
                                 x.send(trigger_note).unwrap();
+                                let x_off = x.clone();
+                                let freq_off: f32 = self.freq.clone();
+                                std::thread::spawn(move || {
+                                    thread::sleep(time::Duration::from_millis(2000));
+                                    let trigger_note_off = TriggerNoteMsg {
+                                        note_type: NoteType::NoteOn,
+                                        freq: freq_off,
+                                        velocity: 0.0,
+                                    };
+                                    x_off.send(trigger_note_off).unwrap();
+                                });
                             }
                             None => {}
                         }
