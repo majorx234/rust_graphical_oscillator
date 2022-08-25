@@ -135,6 +135,7 @@ impl eframe::App for OscillatorGui {
                                 let trigger_note = TriggerNoteMsg {
                                     note_type: NoteType::NoteOn,
                                     freq: self.freq,
+                                    velocity: 0.0,
                                 };
                                 x.send(trigger_note).unwrap();
                             }
