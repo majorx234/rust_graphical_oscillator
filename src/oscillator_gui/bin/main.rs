@@ -13,6 +13,7 @@ use jackmidi::MidiMsg;
 mod jackaudio;
 mod jackprocess;
 use jackprocess::start_jack_thread;
+mod adsr;
 
 fn main() {
     let (tx_close, rx1_close) = unbounded();

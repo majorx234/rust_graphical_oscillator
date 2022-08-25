@@ -35,13 +35,14 @@ cargo run
 
 # ToDo 
 - put wave generation in extra thread and copy data via ring buffer
-- add hull curve envelope and triggering via button
 - add wav-file export
 - add triggering via midi
 - work with modules and reuseable code
 - add polyphon control and wave generation
+- add configurable Midi setup
 
 # History
+- 20220825 add trigger to play sound with envelope
 - 20220720 jack sound output is working
 - 20220712 first version with visualization of AM and FM 
 

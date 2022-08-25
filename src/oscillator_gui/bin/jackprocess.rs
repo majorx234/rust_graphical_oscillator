@@ -1,5 +1,6 @@
 extern crate jack;
 extern crate wmidi;
+use crate::adsr::{adsr_multiplication, generate_adsr_envelope};
 use crate::ctrl_msg::CtrlMsg;
 use crate::jackaudio::SineWaveGenerator;
 use crate::jackmidi::MidiMsg;
@@ -49,6 +50,7 @@ pub fn start_jack_thread(
 
         let mut triggered: (bool, u32) = (false, 0);
         let mut set_zero: bool = false;
+        let mut envelope: Option<Vec<f32>> = None;
 
         let process_callback = move |_: &jack::Client, ps: &jack::ProcessScope| -> jack::Control {
             let show_p = midi_in.iter(ps);
@@ -64,7 +66,16 @@ pub fn start_jack_thread(
                 Err(_) => {}
             };
             match rx_trigger.try_recv() {
-                Ok(_) => triggered = (true, sound_length.clone()),
+                Ok(_) => {
+                    triggered = (true, sound_length.clone());
+                    envelope = Some(generate_adsr_envelope(
+                        triggered.1 as usize,
+                        0.1,
+                        0.2,
+                        0.5,
+                        0.2,
+                    ))
+                }
                 Err(_) => {}
             }
             let (playing, play_time): (bool, u32) = triggered;
@@ -73,6 +84,28 @@ pub fn start_jack_thread(
             if playing {
                 sine_wave_generator.ctrl(&msg);
                 sine_wave_generator.process_samples(out_a_p, out_b_p);
+                match &envelope {
+                    Some(envelope_vec) => {
+                        let length = (play_time.min(frame_size)) as usize;
+                        let startpose: usize = (sound_length - play_time) as usize;
+
+                        adsr_multiplication(
+                            out_a_p,
+                            envelope_vec,
+                            startpose,
+                            length,
+                            frame_size as usize,
+                        );
+                        adsr_multiplication(
+                            out_b_p,
+                            envelope_vec,
+                            startpose,
+                            length,
+                            frame_size as usize,
+                        );
+                    }
+                    None => {}
+                }
             } else {
                 if set_zero == true {
                     out_a_p.fill(0.0);
