@@ -1,6 +1,6 @@
 extern crate jack;
 extern crate wmidi;
-use crate::adsr::{adsr_multiplication, generate_adsr_envelope};
+use crate::adsr::Adsr;
 use crate::ctrl_msg::CtrlMsg;
 use crate::jackaudio::SineWaveGenerator;
 use crate::jackmidi::MidiMsg;
@@ -54,6 +54,7 @@ pub fn start_jack_thread(
         let mut envelope: Option<Vec<f32>> = None;
 
         let process_callback = move |_: &jack::Client, ps: &jack::ProcessScope| -> jack::Control {
+            let adsr_envelope = Adsr::new(0.1, 0.2, 0.5, 0.2);
             let show_p = midi_in.iter(ps);
             for e in show_p {
                 let c: MidiMsg = e.into();
@@ -69,13 +70,7 @@ pub fn start_jack_thread(
             match rx_trigger.try_recv() {
                 Ok(_) => {
                     triggered = (true, sound_length.clone());
-                    envelope = Some(generate_adsr_envelope(
-                        triggered.1 as usize,
-                        0.1,
-                        0.2,
-                        0.5,
-                        0.2,
-                    ))
+                    envelope = Some(adsr_envelope.generate_adsr_envelope(triggered.1 as usize))
                 }
                 Err(_) => {}
             }
@@ -90,14 +85,14 @@ pub fn start_jack_thread(
                         let length = (play_time.min(frame_size)) as usize;
                         let startpose: usize = (sound_length - play_time) as usize;
 
-                        adsr_multiplication(
+                        adsr_envelope.adsr_note_on_multiplicate(
                             out_a_p,
                             envelope_vec,
                             startpose,
                             length,
                             frame_size as usize,
                         );
-                        adsr_multiplication(
+                        adsr_envelope.adsr_note_off_multiplicate(
                             out_b_p,
                             envelope_vec,
                             startpose,
