@@ -14,6 +14,7 @@ pub struct OscillatorGui {
     pub freq_fm: f32,
     pub phase_fm: f32,
     pub num_samples: usize,
+    pub length: usize,
     pub tx_close: Option<crossbeam_channel::Sender<bool>>,
     pub tx_ctrl: Option<std::sync::mpsc::Sender<CtrlMsg>>,
     pub tx_trigger: Option<std::sync::mpsc::Sender<TriggerNoteMsg>>,
@@ -31,6 +32,7 @@ impl Default for OscillatorGui {
             freq_fm: 0.0,
             phase_fm: 0.0,
             num_samples: 48000,
+            length: 96000,
             tx_close: None,
             tx_ctrl: None,
             tx_trigger: None,
@@ -130,6 +132,8 @@ impl eframe::App for OscillatorGui {
                         .show(ui, |plot_ui| plot_ui.line(wave_line));
                 });
                 ui.horizontal(|ui| {
+                    ui.label("length: ");
+                    ui.add(egui::Slider::new(&mut self.length, 0..=192000));
                     if ui.button("trigger").clicked() {
                         match &self.tx_trigger {
                             Some(x) => {
@@ -137,16 +141,19 @@ impl eframe::App for OscillatorGui {
                                     note_type: NoteType::NoteOn,
                                     freq: self.freq,
                                     velocity: 0.0,
+                                    length: self.length,
                                 };
                                 x.send(trigger_note).unwrap();
                                 let x_off = x.clone();
                                 let freq_off: f32 = self.freq.clone();
+                                let note_length: usize = self.length.clone();
                                 std::thread::spawn(move || {
                                     thread::sleep(time::Duration::from_millis(2000));
                                     let trigger_note_off = TriggerNoteMsg {
                                         note_type: NoteType::NoteOn,
                                         freq: freq_off,
                                         velocity: 0.0,
+                                        length: note_length,
                                     };
                                     x_off.send(trigger_note_off).unwrap();
                                 });

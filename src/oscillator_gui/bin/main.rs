@@ -63,6 +63,7 @@ fn main() {
         freq_fm: 0.0,
         phase_fm: 0.0,
         num_samples: 48000,
+        length: 96000,
         tx_close: Some(tx_close),
         tx_ctrl: Some(tx_ctrl),
         tx_trigger: Some(tx_trigger),

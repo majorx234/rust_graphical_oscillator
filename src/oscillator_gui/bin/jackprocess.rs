@@ -64,12 +64,12 @@ pub fn start_jack_thread(
             let out_b_p = out_b.as_mut_slice(ps);
 
             match rx_ctrl.try_recv() {
-                Ok(rx) => msg = rx,
+                Ok(rx_ctrl_msg) => msg = rx_ctrl_msg,
                 Err(_) => {}
             };
             match rx_trigger.try_recv() {
-                Ok(_) => {
-                    triggered = (true, sound_length.clone());
+                Ok(rx_trigger_msg) => {
+                    triggered = (true, rx_trigger_msg.length as u32);
                     envelope = Some(adsr_envelope.generate_adsr_envelope(triggered.1 as usize))
                 }
                 Err(_) => {}
