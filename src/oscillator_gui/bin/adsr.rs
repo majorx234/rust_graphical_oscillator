@@ -54,6 +54,30 @@ impl Adsr {
         size: usize,
         frame_size: usize,
     ) -> () {
+        let mut values_data: Vec<f32> = Vec::with_capacity(size);
+        let fmax_attack: f32 = self.ta * size as f32;
+        let fmax_decay: f32 = self.td * size as f32;
+
+        let max_attack = fmax_attack as usize;
+        let max_decay = fmax_decay as usize;
+
+        if startpose < max_attack {
+            for n in startpose..(max_attack.min(frame_size)) {
+                let s: f32 = ((n % max_attack) as f32) / fmax_attack;
+                in_audio[n - startpose] *= s;
+            }
+        } else {
+            if startpose < max_decay {
+                for n in max_attack..(max_attack + max_decay).min(frame_size) {
+                    let j: usize = n - max_attack;
+                    let s: f32 = 1.0 - (0.7 * ((j % max_decay) as f32) / fmax_decay);
+                    in_audio[n - startpose] *= s;
+                }
+            }
+            for n in 0..frame_size {
+                in_audio[n] *= 0.3;
+            }
+        }
     }
 
     pub fn adsr_note_off_multiplicate(
