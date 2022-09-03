@@ -49,7 +49,7 @@ pub fn start_jack_thread(
         let sound_length = 96000; // value of length of a synth sample
                                   //TODO:  paramter in gui or depending of midi touched key
 
-        let mut triggered: (bool, u32) = (false, 0);
+        let mut triggered: (bool, u32, NoteType) = (false, 0, NoteType::NoteOff);
         let mut set_zero: bool = false;
         let mut envelope: Option<Vec<f32>> = None;
 
@@ -69,12 +69,12 @@ pub fn start_jack_thread(
             };
             match rx_trigger.try_recv() {
                 Ok(rx_trigger_msg) => {
-                    triggered = (true, rx_trigger_msg.length as u32);
+                    triggered = (true, rx_trigger_msg.length as u32, rx_trigger_msg.note_type);
                     envelope = Some(adsr_envelope.generate_adsr_envelope(triggered.1 as usize))
                 }
                 Err(_) => {}
             }
-            let (playing, play_time): (bool, u32) = triggered;
+            let (playing, play_time, note_type): (bool, u32, NoteType) = triggered;
 
             // Use the sine_wave_generator to process samples
             if playing {
@@ -85,8 +85,25 @@ pub fn start_jack_thread(
                         let length = (play_time.min(frame_size)) as usize;
                         let startpose: usize = (sound_length - play_time) as usize;
 
+                        // left channel
                         adsr_envelope.adsr_note_on_multiplicate(
                             out_a_p,
+                            envelope_vec,
+                            startpose,
+                            length,
+                            frame_size as usize,
+                        );
+                        adsr_envelope.adsr_note_off_multiplicate(
+                            out_a_p,
+                            envelope_vec,
+                            startpose,
+                            length,
+                            frame_size as usize,
+                        );
+
+                        // left channel
+                        adsr_envelope.adsr_note_on_multiplicate(
+                            out_b_p,
                             envelope_vec,
                             startpose,
                             length,
@@ -111,9 +128,9 @@ pub fn start_jack_thread(
             }
             if playing {
                 if play_time > frame_size {
-                    triggered = (true, play_time - frame_size);
+                    triggered = (true, play_time - frame_size, note_type.copy());
                 } else {
-                    triggered = (false, 0);
+                    triggered = (false, 0, note_type);
                     set_zero = true;
                 }
             }
