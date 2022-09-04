@@ -49,7 +49,6 @@ impl Adsr {
     pub fn adsr_note_on_multiplicate(
         &self,
         in_audio: &mut [f32],
-        adsr_modificator: &Vec<f32>,
         startpose: usize,
         size: usize,
         frame_size: usize,
@@ -83,7 +82,6 @@ impl Adsr {
     pub fn adsr_note_off_multiplicate(
         &self,
         in_audio: &mut [f32],
-        adsr_modificator: &Vec<f32>,
         startpose: usize,
         size: usize,
         frame_size: usize,

@@ -81,42 +81,42 @@ pub fn start_jack_thread(
                 let length = (play_time.min(frame_size)) as usize;
                 let startpose: usize = (sound_length - play_time) as usize;
 
-                sine_wave_generator.ctrl(&msg);
-                sine_wave_generator.process_samples(out_a_p, out_b_p);
-                match &envelope {
-                    Some(envelope_vec) => {
+                match note_type {
+                    NoteType::NoteOn => {
                         // left channel
                         adsr_envelope.adsr_note_on_multiplicate(
                             out_a_p,
-                            envelope_vec,
                             startpose,
                             length,
                             frame_size as usize,
                         );
-                        adsr_envelope.adsr_note_off_multiplicate(
-                            out_a_p,
-                            envelope_vec,
-                            startpose,
-                            length,
-                            frame_size as usize,
-                        );
-
                         // left channel
                         adsr_envelope.adsr_note_on_multiplicate(
                             out_b_p,
-                            envelope_vec,
-                            startpose,
-                            length,
-                            frame_size as usize,
-                        );
-                        adsr_envelope.adsr_note_off_multiplicate(
-                            out_b_p,
-                            envelope_vec,
                             startpose,
                             length,
                             frame_size as usize,
                         );
                     }
+                    NoteType::NoteOff => {
+                        adsr_envelope.adsr_note_off_multiplicate(
+                            out_a_p,
+                            startpose,
+                            length,
+                            frame_size as usize,
+                        );
+                        adsr_envelope.adsr_note_off_multiplicate(
+                            out_b_p,
+                            startpose,
+                            length,
+                            frame_size as usize,
+                        );
+                    }
+                }
+                sine_wave_generator.ctrl(&msg);
+                sine_wave_generator.process_samples(out_a_p, out_b_p);
+                match &envelope {
+                    Some(envelope_vec) => {}
                     None => {}
                 }
             } else {
