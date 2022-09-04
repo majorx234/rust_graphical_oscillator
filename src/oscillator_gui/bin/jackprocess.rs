@@ -128,7 +128,7 @@ pub fn start_jack_thread(
             }
             if playing {
                 if play_time > frame_size {
-                    triggered = (true, play_time - frame_size, note_type.copy());
+                    triggered = (true, play_time - frame_size, note_type.clone());
                 } else {
                     triggered = (false, 0, note_type);
                     set_zero = true;
