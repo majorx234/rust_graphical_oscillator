@@ -78,13 +78,13 @@ pub fn start_jack_thread(
 
             // Use the sine_wave_generator to process samples
             if playing {
+                let length = (play_time.min(frame_size)) as usize;
+                let startpose: usize = (sound_length - play_time) as usize;
+
                 sine_wave_generator.ctrl(&msg);
                 sine_wave_generator.process_samples(out_a_p, out_b_p);
                 match &envelope {
                     Some(envelope_vec) => {
-                        let length = (play_time.min(frame_size)) as usize;
-                        let startpose: usize = (sound_length - play_time) as usize;
-
                         // left channel
                         adsr_envelope.adsr_note_on_multiplicate(
                             out_a_p,
