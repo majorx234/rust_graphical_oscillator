@@ -25,7 +25,7 @@ impl Adsr {
         let max_attack: u32 = fmax_attack as u32;
         let max_decay: u32 = fmax_decay as u32;
         let max_sustain: u32 = fmax_sustain as u32;
-        let max_release: u32 = max_sustain as u32;
+        let max_release: u32 = fmax_release as u32;
 
         for n in 0..max_attack {
             let s: f32 = ((n % max_attack) as f32) / fmax_attack;
@@ -86,5 +86,15 @@ impl Adsr {
         size: usize,
         frame_size: usize,
     ) {
+        let fmax_release = self.tr * size as f32;
+        let max_release = fmax_release as usize;
+
+        if startpose < max_release {
+            for n in (startpose)..(max_release.min(frame_size)) {
+                let k: usize = n - startpose;
+                let s: f32 = 0.3 - 0.3 * ((k % max_release) as f32) / fmax_release;
+                in_audio[n - startpose] *= s;
+            }
+        }
     }
 }
