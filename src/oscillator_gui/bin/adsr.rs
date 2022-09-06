@@ -59,26 +59,36 @@ impl Adsr {
 
         let max_attack = fmax_attack as usize;
         let max_decay = fmax_decay as usize;
+        let frame_factor: usize = startpose / frame_size;
+        let frame_startpose = startpose % frame_size;
+        let frame_start = frame_factor * frame_size;
+        let frame_end = (frame_factor + 1) * frame_size;
 
         if startpose < max_attack {
-            for n in startpose..(max_attack.min(frame_size)) {
+            for n in startpose..(max_attack.min(frame_end)) {
                 let s: f32 = ((n % max_attack) as f32) / fmax_attack;
                 in_audio[n - startpose] *= s;
             }
         } else {
-            if startpose < max_decay {
-                for n in max_attack..(max_attack + max_decay).min(frame_size) {
+            let decay_end = max_attack + max_decay;
+            if startpose < decay_end {
+                for n in max_attack..decay_end.min(frame_end) {
                     let j: usize = n - max_attack;
                     let s: f32 = 1.0 - (0.7 * ((j % max_decay) as f32) / fmax_decay);
                     in_audio[n - startpose] *= s;
                 }
-            }
-            for n in 0..frame_size {
-                in_audio[n] *= 0.3;
+                if decay_end < frame_end {
+                    for n in decay_end..frame_end {
+                        in_audio[n % frame_size] *= 0.3;
+                    }
+                }
+            } else {
+                for n in startpose..frame_end {
+                    in_audio[n % frame_size] *= 0.3;
+                }
             }
         }
     }
-
     pub fn adsr_note_off_multiplicate(
         &self,
         in_audio: &mut [f32],
