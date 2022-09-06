@@ -81,6 +81,9 @@ pub fn start_jack_thread(
                 let length = (play_time.min(frame_size)) as usize;
                 let startpose: usize = (sound_length - play_time) as usize;
 
+                sine_wave_generator.ctrl(&msg);
+                sine_wave_generator.process_samples(out_a_p, out_b_p);
+
                 match note_type {
                     NoteType::NoteOn => {
                         // left channel
@@ -113,8 +116,6 @@ pub fn start_jack_thread(
                         );
                     }
                 }
-                sine_wave_generator.ctrl(&msg);
-                sine_wave_generator.process_samples(out_a_p, out_b_p);
                 match &envelope {
                     Some(envelope_vec) => {}
                     None => {}
