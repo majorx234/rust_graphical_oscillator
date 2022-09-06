@@ -150,7 +150,7 @@ impl eframe::App for OscillatorGui {
                                 std::thread::spawn(move || {
                                     thread::sleep(time::Duration::from_millis(2000));
                                     let trigger_note_off = TriggerNoteMsg {
-                                        note_type: NoteType::NoteOn,
+                                        note_type: NoteType::NoteOff,
                                         freq: freq_off,
                                         velocity: 0.0,
                                         length: note_length,
