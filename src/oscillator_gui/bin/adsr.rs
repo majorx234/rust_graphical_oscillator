@@ -98,12 +98,27 @@ impl Adsr {
     ) {
         let fmax_release = self.tr * size as f32;
         let max_release = fmax_release as usize;
+        let frame_factor: usize = startpose / frame_size;
+        let frame_startpose = startpose % frame_size;
+        let frame_start = frame_factor * frame_size;
+        let frame_end = (frame_factor + 1) * frame_size;
+        let frame_max_release = max_release % frame_size;
 
         if startpose < max_release {
-            for n in (startpose)..(max_release.min(frame_size)) {
+            for n in (frame_start)..(max_release.min(frame_end)) {
                 let k: usize = n - startpose;
                 let s: f32 = 0.3 - 0.3 * ((k % max_release) as f32) / fmax_release;
                 in_audio[n - startpose] *= s;
+            }
+            let rest_samples = max_release - startpose;
+            if rest_samples < frame_size {
+                for n in rest_samples..frame_size {
+                    in_audio[n] = 0.0;
+                }
+            }
+        } else {
+            for n in 0..frame_size {
+                in_audio[n] = 0.0;
             }
         }
     }
