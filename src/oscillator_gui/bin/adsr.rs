@@ -63,28 +63,61 @@ impl Adsr {
         let frame_startpose = startpose % frame_size;
         let frame_start = frame_factor * frame_size;
         let frame_end = (frame_factor + 1) * frame_size;
+        let frame_max_attack: usize = max_attack % frame_size;
+        let sustain_value: f32 = 0.3;
+        let frame_max_decay: usize = (max_attack + max_decay) % frame_size;
 
         if startpose < max_attack {
-            for n in startpose..(max_attack.min(frame_end)) {
-                let s: f32 = ((n % max_attack) as f32) / fmax_attack;
-                in_audio[n - startpose] *= s;
+            //attack
+            for n in 0..frame_max_attack {
+                let k: usize = startpose + n;
+                let s: f32 = ((k % max_attack) as f32) / fmax_attack;
+                in_audio[frame_startpose + n] *= s;
+            }
+            if max_decay + frame_max_attack < frame_size {
+                //decay
+                for n in frame_max_attack..(frame_max_attack + max_decay) {
+                    let k: usize = startpose + n;
+                    let s: f32 = 1.0 - (0.7 * ((k % max_decay) as f32) / fmax_decay);
+                    in_audio[frame_startpose + n] *= s;
+                }
+                for n in (frame_max_attack + max_decay)..frame_size {
+                    in_audio[frame_startpose + n] *= sustain_value;
+                }
+            } else {
+                //decay rest of frame
+                for n in frame_max_attack..frame_size {
+                    let k: usize = startpose + n - max_attack;
+                    let s: f32 = 1.0 - (0.7 * ((k % max_decay) as f32) / fmax_decay);
+                    in_audio[frame_startpose + n] *= s;
+                }
             }
         } else {
-            let decay_end = max_attack + max_decay;
-            if startpose < decay_end {
-                for n in max_attack..decay_end.min(frame_end) {
-                    let j: usize = n - max_attack;
-                    let s: f32 = 1.0 - (0.7 * ((j % max_decay) as f32) / fmax_decay);
-                    in_audio[n - startpose] *= s;
+            // startpose > max_attack
+            // let rest_decay = frame_size - frame_max_decay;
+            //if startpose < (max_attack + max_decay - rest_decay) {
+            if startpose < (max_attack + max_decay) {
+                //decay
+                for n in 0..frame_size {
+                    let k: usize = startpose + n - max_attack;
+                    let s: f32 = 1.0 - (0.7 * ((k % max_decay) as f32) / fmax_decay);
+                    in_audio[frame_startpose + n] *= s;
                 }
-                if decay_end < frame_end {
-                    for n in decay_end..frame_end {
-                        in_audio[n % frame_size] *= 0.3;
+                if (max_attack + max_decay) - startpose < frame_size {
+                    let rest_sustain = max_attack + max_decay - startpose;
+                    for n in 0..rest_sustain {
+                        in_audio[frame_startpose + n] *= sustain_value;
                     }
                 }
             } else {
-                for n in startpose..frame_end {
-                    in_audio[n % frame_size] *= 0.3;
+                //if startpose < (max_attack + max_decay + max_sustain) {
+                // WIP
+                // let rest_frame_size = (sample_size - startpose);
+                // println!("{}", startpose);
+                // println!("{}", rest_frame_size);
+                // let max_frame_size = frame_size.min(frame_size - rest_frame_size);
+                for n in 0..frame_size {
+                    in_audio[frame_startpose + n] *= sustain_value;
                 }
             }
         }
