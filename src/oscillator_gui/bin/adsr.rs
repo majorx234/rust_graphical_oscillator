@@ -131,10 +131,6 @@ impl Adsr {
     ) {
         let fmax_release = self.tr * size as f32;
         let max_release = fmax_release as usize;
-        let frame_factor: usize = startpose / frame_size;
-        let frame_startpose = startpose % frame_size;
-        let frame_start = frame_factor * frame_size;
-        let frame_end = (frame_factor + 1) * frame_size;
         let frame_max_release = max_release % frame_size;
 
         if startpose + frame_size < max_release {
