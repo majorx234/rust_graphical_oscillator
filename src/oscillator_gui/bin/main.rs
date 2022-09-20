@@ -1,9 +1,8 @@
 extern crate eframe;
 extern crate wmidi;
-use crossbeam_channel::{unbounded, Receiver, Sender};
+use crossbeam_channel::unbounded;
 use std::convert::TryFrom;
 use std::sync::mpsc;
-use std::{thread, time::Duration};
 mod ctrl_msg;
 mod oscillator_gui;
 mod trigger_note_msg;
@@ -44,8 +43,7 @@ fn main() {
                 println!("Singing {} at volume {}", note, volume);
             }
             println!("{:?}", m);
-            let mut run = true;
-            run = rx1_close.try_recv().unwrap();
+            let run: bool = rx1_close.try_recv().unwrap();
             if !run {
                 break;
             }

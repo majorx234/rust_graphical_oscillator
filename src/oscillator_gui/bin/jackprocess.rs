@@ -6,7 +6,6 @@ use crate::jackaudio::SineWaveGenerator;
 use crate::jackmidi::MidiMsg;
 use crate::trigger_note_msg::{NoteType, TriggerNoteMsg};
 use crate::wave::Wave;
-use crossbeam_channel::Receiver;
 use std::{thread, time::Duration};
 
 pub fn start_jack_thread(

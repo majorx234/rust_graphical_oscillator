@@ -1,5 +1,4 @@
 use std::convert::From;
-use std::io;
 
 const MAX_MIDI: usize = 3;
 
