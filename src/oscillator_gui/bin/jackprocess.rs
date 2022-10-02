@@ -143,7 +143,10 @@ pub fn start_jack_thread(
         let mut run: bool = true;
         while run {
             thread::sleep(Duration::from_millis(100));
-            run = rx_close.recv().unwrap();
+            match rx_close.recv() {
+                Ok(running) => (run = running),
+                Err(_) => (run = false),
+            }
         }
         println!("exit audio thread\n");
         active_client.deactivate().unwrap();
