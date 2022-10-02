@@ -51,9 +51,9 @@ pub fn start_jack_thread(
         let mut triggered: (bool, u32, NoteType) = (false, 0, NoteType::NoteOff);
         let mut set_zero: bool = false;
         let mut envelope: Option<Vec<f32>> = None;
+        let adsr_envelope = Adsr::new(0.1, 0.2, 0.5, 0.2);
 
         let process_callback = move |_: &jack::Client, ps: &jack::ProcessScope| -> jack::Control {
-            let adsr_envelope = Adsr::new(0.1, 0.2, 0.5, 0.2);
             let show_p = midi_in.iter(ps);
             for e in show_p {
                 let c: MidiMsg = e.into();
