@@ -1,3 +1,5 @@
+use crate::trigger_note_msg::NoteType;
+
 pub struct Adsr {
     pub ta: f32,
     pub td: f32,
@@ -85,7 +87,7 @@ impl Adsr {
             values_data.push(s);
         }
 
-        for n in (max_release..size as u32) {
+        for n in max_release..size as u32 {
             values_data.push(0.0);
         }
         values_data
@@ -201,6 +203,46 @@ impl Adsr {
                     in_audio[n] = 0.0;
                 }
             }
+        }
+    }
+
+    pub fn multiply_buf(
+        &self,
+        in_audio: &mut [f32],
+        adsr_env: &[f32],
+        startpose: usize,
+        size: usize,
+        frame_size: usize,
+        note_type: NoteType,
+    ) {
+        let mut sample_length: usize = 0;
+        let mut factor: f32 = 1.0;
+        match note_type {
+            NoteType::NoteOn => {
+                sample_length = (size as f32 * (self.ta + self.td)) as usize;
+                factor = self.ts;
+            }
+            NoteType::NoteOff => {
+                // NoteOff
+                sample_length = (size as f32 * self.ts) as usize;
+                factor = 0.0;
+            }
+        }
+
+        let mut nsamples = 0;
+        if (startpose + frame_size) < sample_length {
+            nsamples = frame_size;
+        } else {
+            if startpose < sample_length {
+                nsamples = (startpose + frame_size) - sample_length;
+            }
+        }
+
+        for n in 0..nsamples {
+            in_audio[n] *= adsr_env[n + startpose];
+        }
+        for n in nsamples..frame_size {
+            in_audio[n] *= factor;
         }
     }
 }
