@@ -11,6 +11,7 @@ use std::{thread, time::Duration};
 pub fn start_jack_thread(
     rx_close: crossbeam_channel::Receiver<bool>,
     rx_ctrl: std::sync::mpsc::Receiver<CtrlMsg>,
+    rx_adsr: std::sync::mpsc::Receiver<Adsr>,
     rx_trigger: std::sync::mpsc::Receiver<TriggerNoteMsg>,
     midi_sender: std::sync::mpsc::SyncSender<MidiMsg>,
 ) -> std::thread::JoinHandle<()> {
@@ -51,7 +52,7 @@ pub fn start_jack_thread(
         let mut triggered: (bool, u32, NoteType) = (false, 0, NoteType::NoteOff);
         let mut set_zero: bool = false;
         let mut envelope: Option<Vec<f32>> = None;
-        let adsr_envelope = Adsr::new(0.1, 0.2, 0.5, 0.2);
+        let mut adsr_envelope = Adsr::new(0.1, 0.2, 0.5, 0.2);
 
         let process_callback = move |_: &jack::Client, ps: &jack::ProcessScope| -> jack::Control {
             let show_p = midi_in.iter(ps);
@@ -64,6 +65,10 @@ pub fn start_jack_thread(
 
             match rx_ctrl.try_recv() {
                 Ok(rx_ctrl_msg) => msg = rx_ctrl_msg,
+                Err(_) => {}
+            };
+            match rx_adsr.try_recv() {
+                Ok(rx_adsr_msg) => adsr_envelope = rx_adsr_msg,
                 Err(_) => {}
             };
             match rx_trigger.try_recv() {

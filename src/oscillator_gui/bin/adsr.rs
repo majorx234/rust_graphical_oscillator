@@ -1,8 +1,8 @@
 pub struct Adsr {
-    ta: f32,
-    td: f32,
-    ts: f32,
-    tr: f32,
+    pub ta: f32,
+    pub td: f32,
+    pub ts: f32,
+    pub tr: f32,
 }
 
 impl Adsr {

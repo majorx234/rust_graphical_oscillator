@@ -19,6 +19,7 @@ fn main() {
     let (tx_close, rx1_close) = unbounded();
     let rx2_close = rx1_close.clone();
     let (tx_ctrl, rx_ctrl) = mpsc::channel();
+    let (tx_adsr, rx_adsr) = mpsc::channel();
     let (tx_trigger, rx_trigger) = mpsc::channel();
     let (tx_note_volume, rx_note_volume): (
         std::sync::mpsc::Sender<(f32, f32)>,
@@ -51,7 +52,7 @@ fn main() {
         println!("exit midi thread\n");
     });
 
-    let jack_thread = start_jack_thread(rx2_close, rx_ctrl, rx_trigger, midi_sender);
+    let jack_thread = start_jack_thread(rx2_close, rx_ctrl, rx_adsr, rx_trigger, midi_sender);
     let graphical_osci_app = OscillatorGui {
         freq: 44.0,
         intensity_am: 1.0,
@@ -60,10 +61,15 @@ fn main() {
         intensity_fm: 1.0,
         freq_fm: 0.0,
         phase_fm: 0.0,
+        attack: 0.1,
+        decay: 0.2,
+        sustain: 0.3,
+        release: 0.2,
         num_samples: 48000,
         length: 96000,
         tx_close: Some(tx_close),
         tx_ctrl: Some(tx_ctrl),
+        tx_adsr: Some(tx_adsr),
         tx_trigger: Some(tx_trigger),
         rx_note_volume: Some(rx_note_volume),
     };

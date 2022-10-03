@@ -1,3 +1,4 @@
+use crate::adsr::Adsr;
 use crate::ctrl_msg::CtrlMsg;
 use crate::trigger_note_msg::{NoteType, TriggerNoteMsg};
 use eframe::egui;
@@ -13,10 +14,15 @@ pub struct OscillatorGui {
     pub intensity_fm: f32,
     pub freq_fm: f32,
     pub phase_fm: f32,
+    pub attack: f32,
+    pub decay: f32,
+    pub sustain: f32,
+    pub release: f32,
     pub num_samples: usize,
     pub length: usize,
     pub tx_close: Option<crossbeam_channel::Sender<bool>>,
     pub tx_ctrl: Option<std::sync::mpsc::Sender<CtrlMsg>>,
+    pub tx_adsr: Option<std::sync::mpsc::Sender<Adsr>>,
     pub tx_trigger: Option<std::sync::mpsc::Sender<TriggerNoteMsg>>,
     pub rx_note_volume: Option<std::sync::mpsc::Receiver<(f32, f32)>>,
 }
@@ -31,10 +37,15 @@ impl Default for OscillatorGui {
             intensity_fm: 1.0,
             freq_fm: 0.0,
             phase_fm: 0.0,
+            attack: 0.1,
+            decay: 0.2,
+            sustain: 0.3,
+            release: 0.2,
             num_samples: 48000,
             length: 96000,
             tx_close: None,
             tx_ctrl: None,
+            tx_adsr: None,
             tx_trigger: None,
             rx_note_volume: None,
         }
@@ -85,6 +96,20 @@ impl eframe::App for OscillatorGui {
                 println!("No tx_ctrl\n");
             }
         }
+        let msg_adsr = Adsr {
+            ta: self.attack,
+            td: self.decay,
+            ts: self.sustain,
+            tr: self.release,
+        };
+        match &self.tx_adsr {
+            Some(x) => {
+                x.send(msg_adsr).unwrap();
+            }
+            None => {
+                println!("No tx_adsr\n");
+            }
+        }
         let (values_size, values_data) = my_sine.gen_values();
         let wave = (0..values_size).map(|i| {
             let x = i as f64;
@@ -130,6 +155,16 @@ impl eframe::App for OscillatorGui {
                         .view_aspect(2.0)
                         .data_aspect(self.num_samples as f32 / 4.0)
                         .show(ui, |plot_ui| plot_ui.line(wave_line));
+                });
+                ui.horizontal(|ui| {
+                    ui.label("Attack: ");
+                    ui.add(egui::Slider::new(&mut self.attack, 0.0..=1.0));
+                    ui.label("Decay: ");
+                    ui.add(egui::Slider::new(&mut self.decay, 0.0..=1.0));
+                    ui.label("Sustain: ");
+                    ui.add(egui::Slider::new(&mut self.sustain, 0.0..=1.0));
+                    ui.label("Release: ");
+                    ui.add(egui::Slider::new(&mut self.release, 0.0..=1.0));
                 });
                 ui.horizontal(|ui| {
                     ui.label("length: ");
