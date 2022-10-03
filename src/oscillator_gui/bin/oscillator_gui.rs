@@ -169,7 +169,13 @@ impl eframe::App for OscillatorGui {
                 ui.horizontal(|ui| {
                     ui.label("length: ");
                     ui.add(egui::Slider::new(&mut self.length, 0..=192000));
-                    if ui.button("trigger").clicked() {
+
+                    let trigger_button = ui.button("trigger").interact(egui::Sense {
+                        click: true,
+                        drag: true,
+                        focusable: true,
+                    });
+                    if trigger_button.drag_started() {
                         match &self.tx_trigger {
                             Some(x) => {
                                 let trigger_note = TriggerNoteMsg {
@@ -179,21 +185,23 @@ impl eframe::App for OscillatorGui {
                                     length: self.length,
                                 };
                                 x.send(trigger_note).unwrap();
-                                let x_off = x.clone();
-                                let freq_off: f32 = self.freq.clone();
-                                let note_length: usize = self.length.clone();
-                                std::thread::spawn(move || {
-                                    thread::sleep(time::Duration::from_millis(2000));
+                            }
+                            None => (),
+                        }
+                    } else {
+                        if trigger_button.drag_released() {
+                            match &self.tx_trigger {
+                                Some(x) => {
                                     let trigger_note_off = TriggerNoteMsg {
                                         note_type: NoteType::NoteOff,
-                                        freq: freq_off,
+                                        freq: self.freq,
                                         velocity: 0.0,
-                                        length: note_length,
+                                        length: self.length,
                                     };
-                                    x_off.send(trigger_note_off).unwrap();
-                                });
+                                    x.send(trigger_note_off).unwrap();
+                                }
+                                None => (),
                             }
-                            None => {}
                         }
                     }
                     if ui.button("close").clicked() {
