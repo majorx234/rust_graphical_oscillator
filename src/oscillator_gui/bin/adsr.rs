@@ -209,7 +209,7 @@ impl Adsr {
     pub fn multiply_buf(
         &self,
         in_audio: &mut [f32],
-        adsr_env: &[f32],
+        adsr_env: &Vec<f32>,
         startpose: usize,
         size: usize,
         frame_size: usize,
