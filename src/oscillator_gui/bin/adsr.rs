@@ -54,7 +54,7 @@ impl Adsr {
         let fmax_attack: f32 = self.ta * size as f32;
         let fmax_decay: f32 = self.td * size as f32;
 
-        let sustain_value: f32 = 0.3;
+        let sustain_value: f32 = self.ts;
 
         let max_attack: u32 = fmax_attack as u32;
         let max_decay: u32 = fmax_decay as u32;
@@ -77,7 +77,7 @@ impl Adsr {
     pub fn generate_adsr_note_off_envelope(&self, size: usize) -> Vec<f32> {
         let mut values_data: Vec<f32> = Vec::with_capacity(size);
         let fmax_release: f32 = self.tr * size as f32;
-        let sustain_value: f32 = 0.3;
+        let sustain_value: f32 = self.ts;
 
         let max_release: u32 = fmax_release as u32;
 
