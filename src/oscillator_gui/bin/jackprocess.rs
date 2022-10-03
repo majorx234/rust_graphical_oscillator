@@ -74,7 +74,18 @@ pub fn start_jack_thread(
             match rx_trigger.try_recv() {
                 Ok(rx_trigger_msg) => {
                     triggered = (true, rx_trigger_msg.length as u32, rx_trigger_msg.note_type);
-                    envelope = Some(adsr_envelope.generate_adsr_envelope(triggered.1 as usize))
+                    match triggered.2 {
+                        NoteType::NoteOn => {
+                            envelope = Some(
+                                adsr_envelope.generate_adsr_note_on_envelope(triggered.1 as usize),
+                            );
+                        }
+                        NoteType::NoteOff => {
+                            envelope = Some(
+                                adsr_envelope.generate_adsr_note_off_envelope(triggered.1 as usize),
+                            )
+                        }
+                    }
                 }
                 Err(_) => {}
             }
@@ -88,40 +99,25 @@ pub fn start_jack_thread(
                 sine_wave_generator.ctrl(&msg);
                 sine_wave_generator.process_samples(out_a_p, out_b_p);
 
-                match note_type {
-                    NoteType::NoteOn => {
-                        // left channel
-                        adsr_envelope.adsr_note_on_multiplicate(
-                            out_a_p,
-                            startpose,
-                            length,
-                            frame_size as usize,
-                        );
-                        // left channel
-                        adsr_envelope.adsr_note_on_multiplicate(
-                            out_b_p,
-                            startpose,
-                            length,
-                            frame_size as usize,
-                        );
-                    }
-                    NoteType::NoteOff => {
-                        adsr_envelope.adsr_note_off_multiplicate(
-                            out_a_p,
-                            startpose,
-                            length,
-                            frame_size as usize,
-                        );
-                        adsr_envelope.adsr_note_off_multiplicate(
-                            out_b_p,
-                            startpose,
-                            length,
-                            frame_size as usize,
-                        );
-                    }
-                }
                 match &envelope {
-                    Some(envelope_vec) => {}
+                    Some(envelope_vec) => {
+                        adsr_envelope.multiply_buf(
+                            out_a_p,
+                            &envelope_vec,
+                            startpose,
+                            sound_length as usize,
+                            frame_size as usize,
+                            note_type,
+                        );
+                        adsr_envelope.multiply_buf(
+                            out_b_p,
+                            &envelope_vec,
+                            startpose,
+                            sound_length as usize,
+                            frame_size as usize,
+                            note_type,
+                        );
+                    }
                     None => {}
                 }
             } else {
