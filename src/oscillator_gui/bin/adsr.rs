@@ -214,6 +214,7 @@ impl Adsr {
         size: usize,
         frame_size: usize,
         note_type: NoteType,
+        last_sustain_value: &mut f32,
     ) {
         let mut sample_length: usize = 0;
         let mut factor: f32 = 1.0;
@@ -243,6 +244,11 @@ impl Adsr {
         }
         for n in nsamples..frame_size {
             in_audio[n] *= factor;
+        }
+
+        match note_type {
+            NoteType::NoteOn => (*last_sustain_value = adsr_env[startpose + nsamples - 1]),
+            NoteType::NoteOff => (),
         }
     }
 }

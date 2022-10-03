@@ -54,6 +54,9 @@ pub fn start_jack_thread(
         let mut envelope: Option<Vec<f32>> = None;
         let mut adsr_envelope = Adsr::new(0.1, 0.2, 0.5, 0.2);
 
+        let mut last_sustain_value_a: f32 = adsr_envelope.ts;
+        let mut last_sustain_value_b: f32 = adsr_envelope.ts;
+
         let process_callback = move |_: &jack::Client, ps: &jack::ProcessScope| -> jack::Control {
             let show_p = midi_in.iter(ps);
             for e in show_p {
@@ -81,6 +84,7 @@ pub fn start_jack_thread(
                             );
                         }
                         NoteType::NoteOff => {
+                            adsr_envelope.ts = last_sustain_value_a;
                             envelope = Some(
                                 adsr_envelope.generate_adsr_note_off_envelope(triggered.1 as usize),
                             )
@@ -108,6 +112,7 @@ pub fn start_jack_thread(
                             sound_length as usize,
                             frame_size as usize,
                             note_type,
+                            &mut last_sustain_value_a,
                         );
                         adsr_envelope.multiply_buf(
                             out_b_p,
@@ -116,6 +121,7 @@ pub fn start_jack_thread(
                             sound_length as usize,
                             frame_size as usize,
                             note_type,
+                            &mut last_sustain_value_b,
                         );
                     }
                     None => {}
