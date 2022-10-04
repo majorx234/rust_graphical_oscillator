@@ -14,6 +14,7 @@ mod jackaudio;
 mod jackprocess;
 use jackprocess::start_jack_thread;
 mod adsr;
+use crate::trigger_note_msg::{NoteType, TriggerNoteMsg};
 
 fn main() {
     let (tx_close, rx1_close) = unbounded();
@@ -35,16 +36,29 @@ fn main() {
     let midi_thread: std::thread::JoinHandle<()> = std::thread::spawn(move || {
         while let Ok(m) = midi_receiver.recv() {
             let bytes: &[u8] = &m.data;
-            let message = wmidi::MidiMessage::try_from(bytes);
-
-            if let Ok(wmidi::MidiMessage::NoteOn(_, note, val)) = message {
-                let volume = u8::from(val) as f32 / 127.0;
-                let note_freq = note.to_freq_f32();
-                tx_note_volume.send((note_freq, volume)).unwrap();
-                println!("Singing {} at volume {}", note, volume);
+            if let Ok(message) = wmidi::MidiMessage::try_from(bytes) {
+                match message {
+                    wmidi::MidiMessage::NoteOn(_, note, val) => {
+                        let volume = u8::from(val) as f32 / 127.0;
+                        let note_freq = note.to_freq_f32();
+                        tx_note_volume.send((note_freq, volume)).unwrap();
+                        println!("NoteOn {} at volume {}", note, volume);
+                    }
+                    wmidi::MidiMessage::NoteOff(_, note, val) => {
+                        let volume = u8::from(val) as f32 / 127.0;
+                        let note_freq = note.to_freq_f32();
+                        tx_note_volume.send((note_freq, volume)).unwrap();
+                        println!("NoteOff {} at volume {}", note, volume);
+                    }
+                    message => println!("{:?}", m),
+                }
             }
-            println!("{:?}", m);
-            let run: bool = rx1_close.try_recv().unwrap();
+
+            let mut run: bool = true;
+            match rx1_close.try_recv() {
+                Ok(running) => (run = running),
+                Err(_) => (),
+            }
             if !run {
                 break;
             }
