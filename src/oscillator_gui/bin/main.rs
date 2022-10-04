@@ -1,8 +1,8 @@
-extern crate eframe;
-extern crate wmidi;
 use crossbeam_channel::unbounded;
+use eframe;
 use std::convert::TryFrom;
 use std::sync::mpsc;
+use wmidi;
 mod ctrl_msg;
 mod oscillator_gui;
 mod trigger_note_msg;
