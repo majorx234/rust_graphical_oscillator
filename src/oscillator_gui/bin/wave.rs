@@ -5,5 +5,5 @@ pub trait Wave: Send {
     where
         Self: Sized;
     fn process_samples(&mut self, _output_l: &mut [f32], _output_r: &mut [f32]) {}
-    fn ctrl(&mut self, _msg: &CtrlMsg) {}
+    fn ctrl(&mut self, _msg: &CtrlMsg, freq: f32) {}
 }

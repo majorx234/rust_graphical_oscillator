@@ -4,6 +4,7 @@ pub enum NoteType {
     NoteOff,
 }
 
+#[derive(Clone, Copy)]
 pub struct TriggerNoteMsg {
     pub note_type: NoteType,
     pub freq: f32,

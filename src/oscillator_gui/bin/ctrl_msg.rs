@@ -1,6 +1,5 @@
 pub struct CtrlMsg {
     pub size: usize,
-    pub freq: f32,
     pub intensity_am: f32,
     pub freq_am: f32,
     pub phase_am: f32,

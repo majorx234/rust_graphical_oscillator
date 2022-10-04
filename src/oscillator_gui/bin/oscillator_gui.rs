@@ -79,7 +79,6 @@ impl eframe::App for OscillatorGui {
         }
         let msg = CtrlMsg {
             size: 1024,
-            freq: self.freq,
             intensity_am: self.intensity_am,
             freq_am: self.freq_am,
             phase_am: self.phase_am,

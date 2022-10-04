@@ -53,8 +53,8 @@ impl Wave for SineWaveGenerator {
         self.offset += self.frame_size as usize;
     }
 
-    fn ctrl(&mut self, msg: &CtrlMsg) {
-        self.freq = msg.freq;
+    fn ctrl(&mut self, msg: &CtrlMsg, freq: f32) {
+        self.freq = freq;
         self.intensity_am = msg.intensity_am;
         self.freq_am = msg.freq_am;
         self.phase_am = msg.phase_am;

@@ -22,6 +22,7 @@ fn main() {
     let (tx_ctrl, rx_ctrl) = mpsc::channel();
     let (tx_adsr, rx_adsr) = mpsc::channel();
     let (tx_trigger, rx_trigger) = mpsc::channel();
+    let tx_trigger2 = tx_trigger.clone();
     let (tx_note_volume, rx_note_volume): (
         std::sync::mpsc::Sender<TriggerNoteMsg>,
         std::sync::mpsc::Receiver<TriggerNoteMsg>,
@@ -46,7 +47,9 @@ fn main() {
                             velocity: volume,
                             length: 96000,
                         };
-                        tx_note_volume.send(note_on_msg).unwrap();
+                        tx_note_volume.send(note_on_msg.clone()).unwrap();
+                        tx_trigger2.send(note_on_msg).unwrap();
+
                         println!("NoteOn {} at volume {}", note, volume);
                     }
                     wmidi::MidiMessage::NoteOff(_, note, val) => {
@@ -57,8 +60,9 @@ fn main() {
                             velocity: volume,
                             length: 96000,
                         };
+                        tx_note_volume.send(note_off_msg.clone()).unwrap();
+                        tx_trigger2.send(note_off_msg).unwrap();
 
-                        tx_note_volume.send(note_off_msg).unwrap();
                         println!("NoteOff {} at volume {}", note, volume);
                     }
                     message => println!("{:?}", m),
