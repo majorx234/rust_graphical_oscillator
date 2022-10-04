@@ -1,6 +1,6 @@
 use crate::adsr::Adsr;
 use crate::ctrl_msg::CtrlMsg;
-use crate::trigger_note_msg::{NoteType, TriggerNoteMsg};
+use crate::trigger_note_msg::{self, NoteType, TriggerNoteMsg};
 use eframe::egui;
 use eframe::egui::plot::{Line, Plot, Value, Values};
 use oscillator_lib::wave_gen::SineWave;
@@ -24,7 +24,7 @@ pub struct OscillatorGui {
     pub tx_ctrl: Option<std::sync::mpsc::Sender<CtrlMsg>>,
     pub tx_adsr: Option<std::sync::mpsc::Sender<Adsr>>,
     pub tx_trigger: Option<std::sync::mpsc::Sender<TriggerNoteMsg>>,
-    pub rx_note_volume: Option<std::sync::mpsc::Receiver<(f32, f32)>>,
+    pub rx_note_volume: Option<std::sync::mpsc::Receiver<TriggerNoteMsg>>,
 }
 
 impl Default for OscillatorGui {
@@ -68,10 +68,10 @@ impl eframe::App for OscillatorGui {
         );
         let mut volume: f32 = 0.0;
         match &self.rx_note_volume {
-            Some(note_volume) => match note_volume.try_recv() {
-                Ok((note, vol)) => {
-                    self.freq = note;
-                    volume = vol;
+            Some(rx_note_volume) => match rx_note_volume.try_recv() {
+                Ok(trigger_note_msg) => {
+                    self.freq = trigger_note_msg.freq;
+                    volume = trigger_note_msg.velocity;
                 }
                 Err(_) => {}
             },

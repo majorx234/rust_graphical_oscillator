@@ -23,8 +23,8 @@ fn main() {
     let (tx_adsr, rx_adsr) = mpsc::channel();
     let (tx_trigger, rx_trigger) = mpsc::channel();
     let (tx_note_volume, rx_note_volume): (
-        std::sync::mpsc::Sender<(f32, f32)>,
-        std::sync::mpsc::Receiver<(f32, f32)>,
+        std::sync::mpsc::Sender<TriggerNoteMsg>,
+        std::sync::mpsc::Receiver<TriggerNoteMsg>,
     ) = mpsc::channel();
     let (midi_sender, midi_receiver): (
         std::sync::mpsc::SyncSender<MidiMsg>,
@@ -40,14 +40,25 @@ fn main() {
                 match message {
                     wmidi::MidiMessage::NoteOn(_, note, val) => {
                         let volume = u8::from(val) as f32 / 127.0;
-                        let note_freq = note.to_freq_f32();
-                        tx_note_volume.send((note_freq, volume)).unwrap();
+                        let note_on_msg = TriggerNoteMsg {
+                            note_type: NoteType::NoteOn,
+                            freq: note.to_freq_f32(),
+                            velocity: volume,
+                            length: 96000,
+                        };
+                        tx_note_volume.send(note_on_msg).unwrap();
                         println!("NoteOn {} at volume {}", note, volume);
                     }
                     wmidi::MidiMessage::NoteOff(_, note, val) => {
                         let volume = u8::from(val) as f32 / 127.0;
-                        let note_freq = note.to_freq_f32();
-                        tx_note_volume.send((note_freq, volume)).unwrap();
+                        let note_off_msg = TriggerNoteMsg {
+                            note_type: NoteType::NoteOff,
+                            freq: note.to_freq_f32(),
+                            velocity: volume,
+                            length: 96000,
+                        };
+
+                        tx_note_volume.send(note_off_msg).unwrap();
                         println!("NoteOff {} at volume {}", note, volume);
                     }
                     message => println!("{:?}", m),
