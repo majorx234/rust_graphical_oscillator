@@ -16,9 +16,11 @@ pub fn start_jack_thread(
     midi_sender: std::sync::mpsc::SyncSender<MidiMsg>,
 ) -> std::thread::JoinHandle<()> {
     std::thread::spawn(move || {
+        let mut run: bool = true;
         let (client, _status) =
             jack::Client::new("graphical oscillator", jack::ClientOptions::NO_START_SERVER)
-                .unwrap();
+                .expect("No Jack server running\n");
+
         let sample_rate = client.sample_rate();
         // register ports
         let mut out_a = client
@@ -151,7 +153,6 @@ pub fn start_jack_thread(
         let process = jack::ClosureProcessHandler::new(process_callback);
         let active_client = client.activate_async((), process).unwrap();
 
-        let mut run: bool = true;
         while run {
             thread::sleep(Duration::from_millis(100));
             match rx_close.recv() {
@@ -159,7 +160,9 @@ pub fn start_jack_thread(
                 Err(_) => (run = false),
             }
         }
-        println!("exit audio thread\n");
-        active_client.deactivate().unwrap();
+        match active_client.deactivate() {
+            Ok(_) => println!("exit audio thread\n"),
+            Err(_) => println!("exit audio thread,client deactivation err\n"),
+        }
     })
 }

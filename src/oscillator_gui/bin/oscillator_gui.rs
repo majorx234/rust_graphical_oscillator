@@ -88,9 +88,7 @@ impl eframe::App for OscillatorGui {
             num_samples: self.num_samples,
         };
         match &self.tx_ctrl {
-            Some(x) => {
-                x.send(msg).unwrap();
-            }
+            Some(x) => x.send(msg).unwrap(),
             None => {
                 println!("No tx_ctrl\n");
             }
@@ -102,9 +100,8 @@ impl eframe::App for OscillatorGui {
             tr: self.release,
         };
         match &self.tx_adsr {
-            Some(x) => {
-                x.send(msg_adsr).unwrap();
-            }
+            Some(x) => x.send(msg_adsr).unwrap(),
+
             None => {
                 println!("No tx_adsr\n");
             }
