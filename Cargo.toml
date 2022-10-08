@@ -12,6 +12,10 @@ path = "src/lib.rs"
 name = "oscillator_gui"
 path = "src/oscillator_gui/bin/main.rs"
 
+[[bin]]
+name = "tone_map_example"
+path = "src//oscillator_gui/bin/tone_map_example.rs"
+
 [dependencies]
 eframe = { version = "0.18.0"}
 scan_fmt = "0.2.6"
