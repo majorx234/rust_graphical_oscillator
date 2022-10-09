@@ -1,10 +1,9 @@
 use crate::adsr::Adsr;
 use crate::ctrl_msg::CtrlMsg;
-use crate::trigger_note_msg::{self, NoteType, TriggerNoteMsg};
+use crate::trigger_note_msg::{NoteType, TriggerNoteMsg};
 use eframe::egui;
 use eframe::egui::plot::{Line, Plot, Value, Values};
 use oscillator_lib::wave_gen::SineWave;
-use std::{thread, time};
 
 pub struct OscillatorGui {
     pub freq: f32,
@@ -66,12 +65,12 @@ impl eframe::App for OscillatorGui {
             self.num_samples,
             0,
         );
-        let mut volume: f32 = 0.0;
+        let mut _volume: f32 = 0.0;
         match &self.rx_note_volume {
             Some(rx_note_volume) => match rx_note_volume.try_recv() {
                 Ok(trigger_note_msg) => {
                     self.freq = trigger_note_msg.freq;
-                    volume = trigger_note_msg.velocity;
+                    _volume = trigger_note_msg.velocity;
                 }
                 Err(_) => {}
             },

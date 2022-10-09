@@ -44,7 +44,7 @@ impl Wave for SineWaveGenerator {
             self.frame_size as usize,
             self.offset,
         );
-        let (values_size, values_data) = my_sine.gen_values();
+        let (_, values_data) = my_sine.gen_values();
 
         for i in 0..self.frame_size as usize {
             output_l[i] = values_data[i];

@@ -65,7 +65,7 @@ fn main() {
 
                         println!("NoteOff {} at volume {}", note, volume);
                     }
-                    message => println!("{:?}", m),
+                    message => println!("{:?}", message),
                 }
             }
 

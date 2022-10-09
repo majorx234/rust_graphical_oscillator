@@ -87,7 +87,7 @@ impl Adsr {
             values_data.push(s);
         }
 
-        for n in max_release..size as u32 {
+        for _ in max_release..size as u32 {
             values_data.push(0.0);
         }
         values_data
@@ -99,8 +99,7 @@ impl Adsr {
         startpose: usize,
         size: usize,
         frame_size: usize,
-    ) -> () {
-        let mut values_data: Vec<f32> = Vec::with_capacity(size);
+    ) {
         let fmax_attack: f32 = self.ta * size as f32;
         let fmax_decay: f32 = self.td * size as f32;
 
@@ -108,8 +107,6 @@ impl Adsr {
         let max_decay = fmax_decay as usize;
         let frame_factor: usize = startpose / frame_size;
         let frame_startpose = startpose % frame_size;
-        let frame_start = frame_factor * frame_size;
-        let frame_end = (frame_factor + 1) * frame_size;
         let frame_max_attack: usize = max_attack % frame_size;
         let sustain_value: f32 = 0.3;
         let frame_max_decay: usize = (max_attack + max_decay) % frame_size;
@@ -216,19 +213,11 @@ impl Adsr {
         note_type: NoteType,
         last_sustain_value: &mut f32,
     ) {
-        let mut sample_length: usize = 0;
-        let mut factor: f32 = 1.0;
-        match note_type {
-            NoteType::NoteOn => {
-                sample_length = (size as f32 * (self.ta + self.td)) as usize;
-                factor = self.ts;
-            }
-            NoteType::NoteOff => {
-                // NoteOff
-                sample_length = (size as f32 * self.ts) as usize;
-                factor = 0.0;
-            }
-        }
+        let (sample_length, factor): (usize, f32) = match note_type {
+            NoteType::NoteOn => ((size as f32 * (self.ta + self.td)) as usize, self.ts),
+
+            NoteType::NoteOff => ((size as f32 * self.ts) as usize, 0.0),
+        };
 
         let mut nsamples = 0;
         if (startpose + frame_size) < sample_length {
