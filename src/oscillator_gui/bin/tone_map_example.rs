@@ -2,6 +2,7 @@ mod tone;
 use tone::Tone;
 mod tone_map;
 use tone_map::ToneMap;
+mod adsr;
 mod trigger_note_msg;
 use crate::trigger_note_msg::NoteType;
 
@@ -14,6 +15,7 @@ fn main() {
         freq: 440.0,
         volume: 0.9,
         start_pose: 0,
+        envelope: None,
     };
 
     tone_map.insert(440.0, new_tone);

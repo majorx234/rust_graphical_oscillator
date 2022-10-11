@@ -7,4 +7,5 @@ pub struct Tone {
     pub freq: f32,
     pub volume: f32,
     pub start_pose: u32,
+    pub envelope: Option<Vec<f32>>,
 }
