@@ -23,18 +23,30 @@ impl ToneMap {
             freq: trigger_msg.freq,
             volume: trigger_msg.velocity,
             start_pose: 0,
+            adsr_envelope: Adsr::new(0.1, 0.2, 0.5, 0.2),
             envelope: None,
+            last_sustain_value_a: 0.3,
+            last_sustain_value_b: 0.3,
         };
-        let mut adsr_envelope = Adsr::new(0.1, 0.2, 0.5, 0.2);
+
+        tone.last_sustain_value_a = tone.adsr_envelope.ts;
+        tone.last_sustain_value_b = tone.adsr_envelope.ts;
+
         match trigger_msg.note_type {
             NoteType::NoteOn => {
-                tone.envelope = Some(adsr_envelope.generate_adsr_note_on_envelope(0 as usize))
+                tone.envelope = Some(
+                    tone.adsr_envelope
+                        .generate_adsr_note_on_envelope(0 as usize),
+                )
             }
             NoteType::NoteOff => {
                 //get last sustain value
                 self.remove(tone.freq.clone());
                 //adsr_envelope.ts = last_sustain_value_a;
-                tone.envelope = Some(adsr_envelope.generate_adsr_note_off_envelope(0 as usize))
+                tone.envelope = Some(
+                    tone.adsr_envelope
+                        .generate_adsr_note_off_envelope(0 as usize),
+                )
             }
         }
         self.insert(tone.freq, tone);
