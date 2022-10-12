@@ -29,11 +29,12 @@ impl ToneMap {
             last_sustain_value_b: 0.3,
         };
 
-        tone.last_sustain_value_a = tone.adsr_envelope.ts;
-        tone.last_sustain_value_b = tone.adsr_envelope.ts;
-
         match trigger_msg.note_type {
             NoteType::NoteOn => {
+                // Todo: Add Check if allready playing
+                tone.last_sustain_value_a = tone.adsr_envelope.ts;
+                tone.last_sustain_value_b = tone.adsr_envelope.ts;
+
                 tone.envelope = Some(
                     tone.adsr_envelope
                         .generate_adsr_note_on_envelope(0 as usize),
@@ -41,6 +42,11 @@ impl ToneMap {
             }
             NoteType::NoteOff => {
                 //get last sustain value
+                let (last_sustain_value_a, last_sustain_value_b) =
+                    self.get_last_sustain_values_of_entry(trigger_msg.freq);
+
+                tone.last_sustain_value_a = last_sustain_value_a;
+                tone.last_sustain_value_b = last_sustain_value_b;
                 self.remove(tone.freq.clone());
                 //adsr_envelope.ts = last_sustain_value_a;
                 tone.envelope = Some(
@@ -59,6 +65,14 @@ impl ToneMap {
     pub fn remove(&mut self, freq_index: f32) {
         if let Entry::Occupied(o) = self.hm.entry(freq_index as u32) {
             o.remove_entry();
+        }
+    }
+
+    pub fn get_last_sustain_values_of_entry(&self, freq_index: f32) -> (f32, f32) {
+        let ufreq_index = freq_index as u32;
+        match self.hm.get(&ufreq_index) {
+            Some(tone) => return (tone.last_sustain_value_a, tone.last_sustain_value_b),
+            None => (0.0, 0.0),
         }
     }
 
