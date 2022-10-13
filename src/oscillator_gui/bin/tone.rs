@@ -4,6 +4,7 @@ use crate::trigger_note_msg::NoteType;
 #[derive(Debug)]
 pub struct Tone {
     pub playing: bool,
+    pub length: usize,
     pub note_type: NoteType,
     pub freq: f32,
     pub volume: f32,

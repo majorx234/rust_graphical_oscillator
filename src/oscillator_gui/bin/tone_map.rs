@@ -16,14 +16,15 @@ impl ToneMap {
         ToneMap { hm: HashMap::new() }
     }
 
-    pub fn add_note_msg(&mut self, trigger_msg: TriggerNoteMsg) {
+    pub fn add_note_msg(&mut self, trigger_msg: TriggerNoteMsg, adsr_envelope: Adsr) {
         let mut tone: Tone = Tone {
             playing: true,
+            length: trigger_msg.length,
             note_type: trigger_msg.note_type,
             freq: trigger_msg.freq,
             volume: trigger_msg.velocity,
             start_pose: 0,
-            adsr_envelope: Adsr::new(0.1, 0.2, 0.5, 0.2),
+            adsr_envelope: adsr_envelope,
             envelope: None,
             last_sustain_value_a: 0.3,
             last_sustain_value_b: 0.3,

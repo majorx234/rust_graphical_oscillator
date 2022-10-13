@@ -12,6 +12,7 @@ fn main() {
 
     let new_tone = Tone {
         playing: true,
+        length: 96000,
         note_type: NoteType::NoteOn,
         freq: 440.0,
         volume: 0.9,
