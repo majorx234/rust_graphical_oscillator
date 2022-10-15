@@ -237,7 +237,11 @@ impl Adsr {
         }
 
         match note_type {
-            NoteType::NoteOn => (*last_sustain_value = adsr_env[startpose + nsamples - 1]),
+            NoteType::NoteOn => {
+                let len_adsr_env = adsr_env.len() - 1;
+                let max_adsr_env_index = len_adsr_env.min(startpose + nsamples - 1);
+                (*last_sustain_value = adsr_env[max_adsr_env_index])
+            }
             NoteType::NoteOff => (),
         }
     }

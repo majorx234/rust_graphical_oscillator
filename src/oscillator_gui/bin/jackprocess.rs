@@ -34,7 +34,7 @@ pub fn start_jack_thread(
             .unwrap();
 
         // get frame size
-        let frame_size = client.buffer_size();
+        let frame_size = client.buffer_size() as usize;
         // sinewave generator
         let mut sine_wave_generator = SineWaveGenerator::new(frame_size as u32, sample_rate as f32);
         let mut msg = CtrlMsg {
@@ -45,12 +45,13 @@ pub fn start_jack_thread(
             intensity_fm: 0.0,
             freq_fm: 0.0,
             phase_fm: 0.0,
-            num_samples: frame_size as usize,
+            num_samples: frame_size,
         };
         let sound_length = 96000; // value of length of a synth sample
                                   //TODO:  paramter in gui or depending of midi touched key
 
-        let mut triggered: (bool, u32, NoteType, f32) = (false, 0, NoteType::NoteOff, 0.0);
+        let mut triggered: (bool, Option<usize>, NoteType, f32) =
+            (false, None, NoteType::NoteOff, 0.0);
         let mut set_zero: bool = false;
         let mut envelope: Option<Vec<f32>> = None;
         let mut adsr_envelope = Adsr::new(0.1, 0.2, 0.5, 0.2);
@@ -79,36 +80,31 @@ pub fn start_jack_thread(
             };
             match rx_trigger.try_recv() {
                 Ok(rx_trigger_msg) => {
-                    triggered = (
-                        true,
-                        rx_trigger_msg.length as u32,
-                        rx_trigger_msg.note_type,
-                        rx_trigger_msg.freq,
-                    );
+                    triggered = (true, None, rx_trigger_msg.note_type, rx_trigger_msg.freq);
                     match triggered.2 {
                         NoteType::NoteOn => {
                             envelope = Some(
-                                adsr_envelope.generate_adsr_note_on_envelope(triggered.1 as usize),
+                                adsr_envelope.generate_adsr_note_on_envelope(rx_trigger_msg.length),
                             );
                         }
                         NoteType::NoteOff => {
                             adsr_envelope.ts = last_sustain_value_a;
                             envelope = Some(
-                                adsr_envelope.generate_adsr_note_off_envelope(triggered.1 as usize),
+                                adsr_envelope
+                                    .generate_adsr_note_off_envelope(rx_trigger_msg.length),
                             );
+                            triggered.1 = Some(rx_trigger_msg.length);
                         }
                     };
                     startpose = 0;
                 }
                 Err(_) => {}
             }
-            let (playing, play_time, note_type, freq): (bool, u32, NoteType, f32) = triggered;
+            let (playing, play_time, note_type, freq): (bool, Option<usize>, NoteType, f32) =
+                triggered;
 
             // Use the sine_wave_generator to process samples
             if playing {
-                let length = (play_time.min(frame_size)) as usize;
-                //let startpose: usize = (sound_length - play_time) as usize;
-
                 sine_wave_generator.ctrl(&msg, freq);
                 sine_wave_generator.process_samples(out_a_p, out_b_p);
 
@@ -119,7 +115,7 @@ pub fn start_jack_thread(
                             &envelope_vec,
                             startpose,
                             sound_length as usize,
-                            frame_size as usize,
+                            frame_size,
                             note_type,
                             &mut last_sustain_value_a,
                         );
@@ -128,27 +124,34 @@ pub fn start_jack_thread(
                             &envelope_vec,
                             startpose,
                             sound_length as usize,
-                            frame_size as usize,
+                            frame_size,
                             note_type,
                             &mut last_sustain_value_b,
                         );
                     }
                     None => {}
                 }
-                if play_time > frame_size {
-                    triggered = (true, play_time - frame_size, note_type.clone(), freq);
-                } else {
-                    triggered = (false, 0, note_type.clone(), freq);
-                    set_zero = true;
+                match play_time {
+                    Some(play_time) => {
+                        if play_time > frame_size {
+                            triggered =
+                                (true, Some(play_time - frame_size), note_type.clone(), freq);
+                        } else {
+                            triggered = (false, None, note_type.clone(), freq);
+                            set_zero = true;
+                        }
+                    }
+                    None => (),
                 }
             } else {
+                // not playing
                 if set_zero == true {
                     out_a_p.fill(0.0);
                     out_b_p.fill(0.0);
                     set_zero = false;
                 }
             }
-            startpose += frame_size as usize;
+            startpose += frame_size;
             jack::Control::Continue
         };
 
