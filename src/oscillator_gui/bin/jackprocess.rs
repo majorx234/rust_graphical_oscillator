@@ -58,6 +58,8 @@ pub fn start_jack_thread(
         let mut last_sustain_value_a: f32 = adsr_envelope.ts;
         let mut last_sustain_value_b: f32 = adsr_envelope.ts;
 
+        let mut startpose: usize = 0;
+
         let process_callback = move |_: &jack::Client, ps: &jack::ProcessScope| -> jack::Control {
             let show_p = midi_in.iter(ps);
             for e in show_p {
@@ -93,9 +95,10 @@ pub fn start_jack_thread(
                             adsr_envelope.ts = last_sustain_value_a;
                             envelope = Some(
                                 adsr_envelope.generate_adsr_note_off_envelope(triggered.1 as usize),
-                            )
+                            );
                         }
-                    }
+                    };
+                    startpose = 0;
                 }
                 Err(_) => {}
             }
@@ -104,7 +107,7 @@ pub fn start_jack_thread(
             // Use the sine_wave_generator to process samples
             if playing {
                 let length = (play_time.min(frame_size)) as usize;
-                let startpose: usize = (sound_length - play_time) as usize;
+                //let startpose: usize = (sound_length - play_time) as usize;
 
                 sine_wave_generator.ctrl(&msg, freq);
                 sine_wave_generator.process_samples(out_a_p, out_b_p);
@@ -132,6 +135,12 @@ pub fn start_jack_thread(
                     }
                     None => {}
                 }
+                if play_time > frame_size {
+                    triggered = (true, play_time - frame_size, note_type.clone(), freq);
+                } else {
+                    triggered = (false, 0, note_type.clone(), freq);
+                    set_zero = true;
+                }
             } else {
                 if set_zero == true {
                     out_a_p.fill(0.0);
@@ -139,14 +148,7 @@ pub fn start_jack_thread(
                     set_zero = false;
                 }
             }
-            if playing {
-                if play_time > frame_size {
-                    triggered = (true, play_time - frame_size, note_type.clone(), freq);
-                } else {
-                    triggered = (false, 0, note_type.clone(), freq);
-                    set_zero = true;
-                }
-            }
+            startpose += frame_size as usize;
             jack::Control::Continue
         };
 
