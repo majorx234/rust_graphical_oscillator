@@ -38,7 +38,7 @@ impl ToneMap {
 
                 tone.envelope = Some(
                     tone.adsr_envelope
-                        .generate_adsr_note_on_envelope(0 as usize),
+                        .generate_adsr_note_on_envelope(tone.length),
                 )
             }
             NoteType::NoteOff => {
@@ -52,7 +52,7 @@ impl ToneMap {
                 //adsr_envelope.ts = last_sustain_value_a;
                 tone.envelope = Some(
                     tone.adsr_envelope
-                        .generate_adsr_note_off_envelope(0 as usize),
+                        .generate_adsr_note_off_envelope(tone.length),
                 )
             }
         }
