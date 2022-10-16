@@ -240,7 +240,7 @@ impl Adsr {
             NoteType::NoteOn => {
                 let len_adsr_env = adsr_env.len() - 1;
                 let max_adsr_env_index = len_adsr_env.min(startpose + nsamples - 1);
-                (*last_sustain_value = adsr_env[max_adsr_env_index])
+                *last_sustain_value = adsr_env[max_adsr_env_index]
             }
             NoteType::NoteOff => (),
         }
