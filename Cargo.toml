@@ -14,7 +14,11 @@ path = "src/oscillator_gui/bin/main.rs"
 
 [[bin]]
 name = "tone_map_example"
-path = "src//oscillator_gui/bin/tone_map_example.rs"
+path = "src/oscillator_gui/bin/tone_map_example.rs"
+
+[[bin]]
+name = "tone_handling_example"
+path = "src/oscillator_gui/bin/tone_handling_example.rs"
 
 [dependencies]
 eframe = { version = "0.18.0"}
