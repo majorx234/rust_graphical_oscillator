@@ -1,4 +1,5 @@
 use crate::adsr::Adsr;
+use crate::ctrl_msg::CtrlMsg;
 use crate::tone::Tone;
 use crate::trigger_note_msg::{NoteType, TriggerNoteMsg};
 
@@ -56,6 +57,11 @@ impl ToneHandling {
             }
         }
         self.tone_map.insert(tone.freq, tone);
+    }
+
+    pub fn process_tones(&mut self, msg: &CtrlMsg, output_l: &mut [f32], output_r: &mut [f32]) {
+        self.tone_map
+            .iterate_over_tones(Box::new(|tone: &Tone| println!("tone {:?}", tone)));
     }
 
     pub fn get_last_sustain_values_of_entry(&self, freq_index: f32) -> (f32, f32) {

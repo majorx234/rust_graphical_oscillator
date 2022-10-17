@@ -2,6 +2,7 @@ mod tone;
 use tone::Tone;
 mod tone_map;
 use tone_map::ToneMap;
+mod ctrl_msg;
 mod tone_handling;
 use tone_handling::ToneHandling;
 mod adsr;
