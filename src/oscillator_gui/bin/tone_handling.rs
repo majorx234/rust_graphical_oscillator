@@ -1,9 +1,10 @@
 use crate::adsr::Adsr;
 use crate::ctrl_msg::CtrlMsg;
+use crate::jackaudio::SineWaveGenerator;
 use crate::tone::Tone;
-use crate::trigger_note_msg::{NoteType, TriggerNoteMsg};
-
 use crate::tone_map::ToneMap;
+use crate::trigger_note_msg::{NoteType, TriggerNoteMsg};
+use crate::wave::Wave;
 
 #[derive(Debug)]
 pub struct ToneHandling {
@@ -28,6 +29,7 @@ impl ToneHandling {
             envelope: None,
             last_sustain_value_a: 0.3,
             last_sustain_value_b: 0.3,
+            sine_wave_generator: SineWaveGenerator::new(1024, 48000.0),
         };
 
         match trigger_msg.note_type {
@@ -59,7 +61,13 @@ impl ToneHandling {
         self.tone_map.insert(tone.freq, tone);
     }
 
-    pub fn process_tones(&mut self, msg: &CtrlMsg, output_l: &mut [f32], output_r: &mut [f32]) {
+    pub fn process_tones(
+        &mut self,
+        msg: &CtrlMsg,
+        output_l: &mut [f32],
+        output_r: &mut [f32],
+        frame_size: usize,
+    ) {
         self.tone_map
             .iterate_over_tones(Box::new(|tone: &Tone| println!("tone {:?}", tone)));
     }

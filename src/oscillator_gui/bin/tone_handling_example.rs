@@ -10,8 +10,11 @@ mod adsr;
 use crate::adsr::Adsr;
 mod trigger_note_msg;
 use crate::trigger_note_msg::{NoteType, TriggerNoteMsg};
+mod jackaudio;
+mod wave;
 
 fn main() {
+    let frame_size: usize = 1024;
     let mut tone_handling = ToneHandling::new();
 
     let trigger_msg1 = TriggerNoteMsg {
@@ -38,7 +41,7 @@ fn main() {
     for _ in [0..10] {
         let mut out_l: [f32; 1024] = [0.0; 1024];
         let mut out_r: [f32; 1024] = [0.0; 1024];
-        tone_handling.process_tones(&ctrl_msg, &mut out_l, &mut out_r);
+        tone_handling.process_tones(&ctrl_msg, &mut out_l, &mut out_r, frame_size);
     }
 
     let trigger_msg2 = TriggerNoteMsg {
@@ -54,6 +57,6 @@ fn main() {
     for _ in [0..10] {
         let mut out_l: [f32; 1024] = [0.0; 1024];
         let mut out_r: [f32; 1024] = [0.0; 1024];
-        tone_handling.process_tones(&ctrl_msg, &mut out_l, &mut out_r);
+        tone_handling.process_tones(&ctrl_msg, &mut out_l, &mut out_r, frame_size);
     }
 }

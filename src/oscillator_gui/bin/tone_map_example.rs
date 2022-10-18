@@ -6,6 +6,11 @@ mod adsr;
 use crate::adsr::Adsr;
 mod trigger_note_msg;
 use crate::trigger_note_msg::NoteType;
+mod ctrl_msg;
+mod jackaudio;
+use crate::jackaudio::SineWaveGenerator;
+mod wave;
+use crate::wave::Wave;
 
 fn main() {
     let mut tone_map = ToneMap::new();
@@ -21,6 +26,7 @@ fn main() {
         envelope: None,
         last_sustain_value_a: 0.3,
         last_sustain_value_b: 0.3,
+        sine_wave_generator: SineWaveGenerator::new(1024, 48000.0),
     };
 
     tone_map.insert(440.0, new_tone);

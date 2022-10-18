@@ -2,6 +2,7 @@ use crate::ctrl_msg::CtrlMsg;
 use crate::wave::Wave;
 use oscillator_lib::wave_gen::SineWave;
 
+#[derive(Debug)]
 pub struct SineWaveGenerator {
     pub freq: f32,
     pub intensity_am: f32,

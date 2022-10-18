@@ -1,4 +1,5 @@
 use crate::adsr::Adsr;
+use crate::jackaudio::SineWaveGenerator;
 use crate::trigger_note_msg::NoteType;
 
 #[derive(Debug)]
@@ -13,4 +14,5 @@ pub struct Tone {
     pub envelope: Option<Vec<f32>>,
     pub last_sustain_value_a: f32,
     pub last_sustain_value_b: f32,
+    pub sine_wave_generator: SineWaveGenerator,
 }
