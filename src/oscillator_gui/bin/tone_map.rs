@@ -35,8 +35,8 @@ impl ToneMap {
         println!("{:?}", self.hm);
     }
 
-    pub fn iterate_over_tones(&self, mut fnct: Box<dyn FnMut(&Tone) -> () + '_>) {
-        for (key, value) in (&self.hm).into_iter() {
+    pub fn iterate_over_tones(&mut self, mut fnct: Box<dyn FnMut(&mut Tone) -> () + '_>) {
+        for (key, value) in self.hm.iter_mut() {
             fnct(value);
         }
     }

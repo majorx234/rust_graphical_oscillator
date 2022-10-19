@@ -64,12 +64,18 @@ impl ToneHandling {
     pub fn process_tones(
         &mut self,
         msg: &CtrlMsg,
-        output_l: &mut [f32],
-        output_r: &mut [f32],
+        mut output_l: &mut [f32],
+        mut output_r: &mut [f32],
         frame_size: usize,
     ) {
         self.tone_map
-            .iterate_over_tones(Box::new(|tone: &Tone| println!("tone {:?}", tone)));
+            .iterate_over_tones(Box::new(|tone: &mut Tone| {
+                tone.sine_wave_generator.ctrl(&msg, tone.freq);
+                tone.sine_wave_generator
+                    .process_samples(&mut output_l, &mut output_r);
+
+                println!("tone {:?}", tone)
+            }));
     }
 
     pub fn get_last_sustain_values_of_entry(&self, freq_index: f32) -> (f32, f32) {
