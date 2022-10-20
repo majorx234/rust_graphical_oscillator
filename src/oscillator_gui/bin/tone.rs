@@ -9,7 +9,7 @@ pub struct Tone {
     pub note_type: NoteType,
     pub freq: f32,
     pub volume: f32,
-    pub start_pose: u32,
+    pub start_pose: usize,
     pub adsr_envelope: Adsr,
     pub envelope: Option<Vec<f32>>,
     pub last_sustain_value_a: f32,

@@ -73,6 +73,29 @@ impl ToneHandling {
                 tone.sine_wave_generator.ctrl(&msg, tone.freq);
                 tone.sine_wave_generator
                     .process_samples(&mut output_l, &mut output_r);
+                match &tone.envelope {
+                    Some(envelope) => {
+                        tone.adsr_envelope.multiply_buf(
+                            output_l,
+                            &envelope,
+                            tone.start_pose,
+                            tone.length,
+                            frame_size,
+                            tone.note_type,
+                            &mut tone.last_sustain_value_a,
+                        );
+                        tone.adsr_envelope.multiply_buf(
+                            output_r,
+                            &envelope,
+                            tone.start_pose,
+                            tone.length,
+                            frame_size,
+                            tone.note_type,
+                            &mut tone.last_sustain_value_b,
+                        );
+                    }
+                    None => (),
+                }
 
                 println!("tone {:?}", tone)
             }));
