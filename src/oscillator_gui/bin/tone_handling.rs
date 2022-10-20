@@ -96,7 +96,11 @@ impl ToneHandling {
                     }
                     None => (),
                 }
-
+                if tone.start_pose as f32 > tone.adsr_envelope.tr * tone.length as f32
+                    && tone.note_type == NoteType::NoteOff
+                {
+                    tone.playing = false;
+                }
                 println!("tone {:?}", tone)
             }));
     }

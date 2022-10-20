@@ -1,4 +1,4 @@
-#[derive(Clone, Copy, Debug)]
+#[derive(Eq, PartialEq, Clone, Copy, Debug)]
 pub enum NoteType {
     NoteOn,
     NoteOff,
