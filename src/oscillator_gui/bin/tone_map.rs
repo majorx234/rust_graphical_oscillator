@@ -36,8 +36,18 @@ impl ToneMap {
     }
 
     pub fn iterate_over_tones(&mut self, mut fnct: Box<dyn FnMut(&mut Tone) -> () + '_>) {
+        let mut tone_to_delete_key_list: Vec<u32> = Vec::new();
         for (key, value) in self.hm.iter_mut() {
-            fnct(value);
+            if value.playing == false {
+                tone_to_delete_key_list.push(*key);
+            } else {
+                fnct(value);
+            }
+        }
+        for key in tone_to_delete_key_list {
+            if let Entry::Occupied(o) = self.hm.entry(key) {
+                o.remove_entry();
+            }
         }
     }
 }
