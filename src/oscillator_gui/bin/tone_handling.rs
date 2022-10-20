@@ -70,9 +70,12 @@ impl ToneHandling {
     ) {
         self.tone_map
             .iterate_over_tones(Box::new(|tone: &mut Tone| {
+                let mut frame_l: [f32; 1024] = [0.0; 1024];
+                let mut frame_r: [f32; 1024] = [0.0; 1024];
+
                 tone.sine_wave_generator.ctrl(&msg, tone.freq);
                 tone.sine_wave_generator
-                    .process_samples(&mut output_l, &mut output_r);
+                    .process_samples(&mut frame_l, &mut frame_r);
                 match &tone.envelope {
                     Some(envelope) => {
                         tone.adsr_envelope.multiply_buf(
@@ -96,6 +99,12 @@ impl ToneHandling {
                     }
                     None => (),
                 }
+
+                for index in 0..frame_size {
+                    output_l[index] += frame_l[index];
+                    output_r[index] += frame_r[index];
+                }
+
                 if tone.start_pose as f32 > tone.adsr_envelope.tr * tone.length as f32
                     && tone.note_type == NoteType::NoteOff
                 {
