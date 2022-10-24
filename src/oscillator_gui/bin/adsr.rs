@@ -1,6 +1,6 @@
 use crate::trigger_note_msg::NoteType;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Adsr {
     pub ta: f32,
     pub td: f32,
