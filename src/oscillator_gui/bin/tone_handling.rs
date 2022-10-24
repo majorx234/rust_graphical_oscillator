@@ -63,23 +63,25 @@ impl ToneHandling {
 
     pub fn process_tones(
         &mut self,
-        msg: &CtrlMsg,
-        mut output_l: &mut [f32],
-        mut output_r: &mut [f32],
+        ctrl_msg: &CtrlMsg,
+        output_l: &mut [f32],
+        output_r: &mut [f32],
         frame_size: usize,
     ) {
+        output_l.fill(0.0);
+        output_r.fill(0.0);
         self.tone_map
             .iterate_over_tones(Box::new(|tone: &mut Tone| {
                 let mut frame_l: [f32; 1024] = [0.0; 1024];
                 let mut frame_r: [f32; 1024] = [0.0; 1024];
 
-                tone.sine_wave_generator.ctrl(&msg, tone.freq);
+                tone.sine_wave_generator.ctrl(&ctrl_msg, tone.freq);
                 tone.sine_wave_generator
                     .process_samples(&mut frame_l, &mut frame_r);
                 match &tone.envelope {
                     Some(envelope) => {
                         tone.adsr_envelope.multiply_buf(
-                            output_l,
+                            &mut frame_l,
                             &envelope,
                             tone.start_pose,
                             tone.length,
@@ -88,7 +90,7 @@ impl ToneHandling {
                             &mut tone.last_sustain_value_a,
                         );
                         tone.adsr_envelope.multiply_buf(
-                            output_r,
+                            &mut frame_r,
                             &envelope,
                             tone.start_pose,
                             tone.length,
@@ -109,8 +111,9 @@ impl ToneHandling {
                     && tone.note_type == NoteType::NoteOff
                 {
                     tone.playing = false;
+                } else {
+                    tone.start_pose += frame_size;
                 }
-                println!("tone {:?}", tone)
             }));
     }
 
