@@ -4,6 +4,7 @@ use crate::adsr::Adsr;
 use crate::ctrl_msg::CtrlMsg;
 use crate::jackaudio::SineWaveGenerator;
 use crate::jackmidi::MidiMsg;
+use crate::tone_handling::ToneHandling;
 use crate::trigger_note_msg::{NoteType, TriggerNoteMsg};
 use crate::wave::Wave;
 use std::{thread, time::Duration};
@@ -35,9 +36,8 @@ pub fn start_jack_thread(
 
         // get frame size
         let frame_size = client.buffer_size() as usize;
-        // sinewave generator
-        let mut sine_wave_generator = SineWaveGenerator::new(frame_size as u32, sample_rate as f32);
-        let mut msg = CtrlMsg {
+        let mut tone_handling = ToneHandling::new();
+        let mut ctrl_msg = CtrlMsg {
             size: 0,
             intensity_am: 0.0,
             freq_am: 0.0,
@@ -49,17 +49,7 @@ pub fn start_jack_thread(
         };
         let sound_length = 96000; // value of length of a synth sample
                                   //TODO:  paramter in gui or depending of midi touched key
-
-        let mut triggered: (bool, Option<usize>, NoteType, f32) =
-            (false, None, NoteType::NoteOff, 0.0);
-        let mut set_zero: bool = false;
-        let mut envelope: Option<Vec<f32>> = None;
         let mut adsr_envelope = Adsr::new(0.1, 0.2, 0.5, 0.2);
-
-        let mut last_sustain_value_a: f32 = adsr_envelope.ts;
-        let mut last_sustain_value_b: f32 = adsr_envelope.ts;
-
-        let mut startpose: usize = 0;
 
         let process_callback = move |_: &jack::Client, ps: &jack::ProcessScope| -> jack::Control {
             let show_p = midi_in.iter(ps);
@@ -71,87 +61,21 @@ pub fn start_jack_thread(
             let out_b_p = out_b.as_mut_slice(ps);
 
             match rx_ctrl.try_recv() {
-                Ok(rx_ctrl_msg) => msg = rx_ctrl_msg,
+                Ok(rx_ctrl_msg) => ctrl_msg = rx_ctrl_msg,
                 Err(_) => {}
             };
             match rx_adsr.try_recv() {
                 Ok(rx_adsr_msg) => adsr_envelope = rx_adsr_msg,
                 Err(_) => {}
             };
+
             match rx_trigger.try_recv() {
                 Ok(rx_trigger_msg) => {
-                    triggered = (true, None, rx_trigger_msg.note_type, rx_trigger_msg.freq);
-                    match triggered.2 {
-                        NoteType::NoteOn => {
-                            envelope = Some(
-                                adsr_envelope.generate_adsr_note_on_envelope(rx_trigger_msg.length),
-                            );
-                        }
-                        NoteType::NoteOff => {
-                            adsr_envelope.ts = last_sustain_value_a;
-                            envelope = Some(
-                                adsr_envelope
-                                    .generate_adsr_note_off_envelope(rx_trigger_msg.length),
-                            );
-                            triggered.1 = Some(rx_trigger_msg.length);
-                        }
-                    };
-                    startpose = 0;
+                    tone_handling.add_note_msg(rx_trigger_msg, adsr_envelope.clone());
                 }
                 Err(_) => {}
             }
-            let (playing, play_time, note_type, freq): (bool, Option<usize>, NoteType, f32) =
-                triggered;
-
-            // Use the sine_wave_generator to process samples
-            if playing {
-                sine_wave_generator.ctrl(&msg, freq);
-                sine_wave_generator.process_samples(out_a_p, out_b_p);
-
-                match &envelope {
-                    Some(envelope_vec) => {
-                        adsr_envelope.multiply_buf(
-                            out_a_p,
-                            &envelope_vec,
-                            startpose,
-                            sound_length as usize,
-                            frame_size,
-                            note_type,
-                            &mut last_sustain_value_a,
-                        );
-                        adsr_envelope.multiply_buf(
-                            out_b_p,
-                            &envelope_vec,
-                            startpose,
-                            sound_length as usize,
-                            frame_size,
-                            note_type,
-                            &mut last_sustain_value_b,
-                        );
-                    }
-                    None => {}
-                }
-                match play_time {
-                    Some(play_time) => {
-                        if play_time > frame_size {
-                            triggered =
-                                (true, Some(play_time - frame_size), note_type.clone(), freq);
-                        } else {
-                            triggered = (false, None, note_type.clone(), freq);
-                            set_zero = true;
-                        }
-                    }
-                    None => (),
-                }
-            } else {
-                // not playing
-                if set_zero == true {
-                    out_a_p.fill(0.0);
-                    out_b_p.fill(0.0);
-                    set_zero = false;
-                }
-            }
-            startpose += frame_size;
+            tone_handling.process_tones(&ctrl_msg, out_a_p, out_b_p, frame_size);
             jack::Control::Continue
         };
 

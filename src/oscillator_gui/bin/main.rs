@@ -14,6 +14,9 @@ mod jackaudio;
 mod jackprocess;
 use jackprocess::start_jack_thread;
 mod adsr;
+mod tone;
+mod tone_handling;
+mod tone_map;
 use crate::trigger_note_msg::{NoteType, TriggerNoteMsg};
 
 fn main() {
