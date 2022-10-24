@@ -51,7 +51,7 @@ impl ToneHandling {
                 tone.last_sustain_value_a = last_sustain_value_a;
                 tone.last_sustain_value_b = last_sustain_value_b;
                 self.tone_map.remove(tone.freq.clone());
-                //adsr_envelope.ts = last_sustain_value_a;
+                tone.adsr_envelope.ts = last_sustain_value_a;
                 tone.envelope = Some(
                     tone.adsr_envelope
                         .generate_adsr_note_off_envelope(tone.length),
