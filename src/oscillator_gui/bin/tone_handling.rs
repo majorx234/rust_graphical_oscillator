@@ -25,10 +25,10 @@ impl ToneHandling {
             freq: trigger_msg.freq,
             volume: trigger_msg.velocity,
             start_pose: 0,
-            adsr_envelope: adsr_envelope,
+            adsr_envelope: adsr_envelope.clone(),
             envelope: None,
-            last_sustain_value_a: 0.3,
-            last_sustain_value_b: 0.3,
+            last_sustain_value_a: adsr_envelope.ts,
+            last_sustain_value_b: adsr_envelope.ts,
             sine_wave_generator: SineWaveGenerator::new(1024, 48000.0),
         };
 
