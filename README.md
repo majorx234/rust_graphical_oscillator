@@ -34,20 +34,23 @@ cargo run
 ```
 
 # ToDo 
+- better mixing of polyphone tones
+- LP,BP,HP filter
+- Effects
 - put wave generation in extra thread and copy data via ring buffer
 - add wav-file export
-- add triggering via midi
 - work with modules and reuseable code
-- add polyphon control and wave generation
 - add configurable Midi setup
+- update GUI with visualization of ADSR
 
 # History
+- 20221025 polyphon tone generartion over midi
 - 20220825 add trigger to play sound with envelope
 - 20220720 jack sound output is working
 - 20220712 first version with visualization of AM and FM 
 
 # Troubleshooting
-* while build
+* while building
 ```
 stderr
   thread 'main' panicked at 'called `Result::unwrap()` on an `Err` value: "`\"pkg-config\" \"--libs\" \"--cflags\" \"jack\"` did not exit successfully: exit status: 1\nerror: could not find system library 'jack' required by the 'jack-sys' crate
