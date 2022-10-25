@@ -47,7 +47,11 @@ impl ToneHandling {
                 //get last sustain value
                 let (last_sustain_value_a, last_sustain_value_b) =
                     self.get_last_sustain_values_of_entry(trigger_msg.freq);
-
+                if let Some(sine_wave_generator) =
+                    self.get_sine_wave_generator_of_entry(trigger_msg.freq)
+                {
+                    tone.sine_wave_generator = sine_wave_generator;
+                };
                 tone.last_sustain_value_a = last_sustain_value_a;
                 tone.last_sustain_value_b = last_sustain_value_b;
                 self.tone_map.remove(tone.freq.clone());
@@ -121,6 +125,12 @@ impl ToneHandling {
         match self.tone_map.get(freq_index) {
             Some(tone) => return (tone.last_sustain_value_a, tone.last_sustain_value_b),
             None => (0.0, 0.0),
+        }
+    }
+    pub fn get_sine_wave_generator_of_entry(&self, freq_index: f32) -> Option<SineWaveGenerator> {
+        match self.tone_map.get(freq_index) {
+            Some(tone) => return Some(tone.sine_wave_generator.clone()),
+            None => None,
         }
     }
 }
