@@ -50,7 +50,7 @@ impl Adsr {
         values_data
     }
 
-    pub fn generate_adsr_note_on_envelope(&self, size: usize) -> Vec<f32> {
+    pub fn generate_adsr_note_on_envelope(&self, size: usize, last_value: f32) -> Vec<f32> {
         let mut values_data: Vec<f32> = Vec::with_capacity(size);
         let fmax_attack: f32 = self.ta * size as f32;
         let fmax_decay: f32 = self.td * size as f32;
@@ -61,7 +61,7 @@ impl Adsr {
         let max_decay: u32 = fmax_decay as u32;
 
         for n in 0..max_attack {
-            let s: f32 = ((n % max_attack) as f32) / fmax_attack;
+            let s: f32 = last_value + (1.0 - last_value) * ((n % max_attack) as f32) / fmax_attack;
             values_data.push(s);
         }
         for n in max_attack..(max_attack + max_decay) {
@@ -236,13 +236,14 @@ impl Adsr {
             in_audio[n] *= factor;
         }
 
-        match note_type {
-            NoteType::NoteOn => {
-                let len_adsr_env = adsr_env.len() - 1;
-                let max_adsr_env_index = len_adsr_env.min(startpose + nsamples - 1);
-                *last_sustain_value = adsr_env[max_adsr_env_index]
-            }
-            NoteType::NoteOff => (),
-        }
+        let len_adsr_env = adsr_env.len() - 1;
+        print!("sp: {} ns: {}\n", startpose, nsamples);
+        let tone_index = if startpose + nsamples == 0 {
+            0
+        } else {
+            startpose + nsamples - 1
+        };
+        let max_adsr_env_index = len_adsr_env.min(tone_index);
+        *last_sustain_value = adsr_env[max_adsr_env_index];
     }
 }

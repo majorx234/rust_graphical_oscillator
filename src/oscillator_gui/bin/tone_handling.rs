@@ -27,35 +27,29 @@ impl ToneHandling {
             start_pose: 0,
             adsr_envelope: adsr_envelope.clone(),
             envelope: None,
-            last_sustain_value_a: adsr_envelope.ts,
-            last_sustain_value_b: adsr_envelope.ts,
+            last_sustain_value_a: 0.0,
+            last_sustain_value_b: 0.0,
             sine_wave_generator: SineWaveGenerator::new(1024, 48000.0),
         };
 
+        //get last sustain value
+        (tone.last_sustain_value_a, tone.last_sustain_value_b) =
+            self.get_last_sustain_values_of_entry(trigger_msg.freq);
+
+        // Todo: Add Check if allready playing
+        if let Some(sine_wave_generator) = self.get_sine_wave_generator_of_entry(trigger_msg.freq) {
+            tone.sine_wave_generator = sine_wave_generator;
+        };
         match trigger_msg.note_type {
             NoteType::NoteOn => {
-                // Todo: Add Check if allready playing
-                tone.last_sustain_value_a = tone.adsr_envelope.ts;
-                tone.last_sustain_value_b = tone.adsr_envelope.ts;
-
                 tone.envelope = Some(
                     tone.adsr_envelope
-                        .generate_adsr_note_on_envelope(tone.length),
+                        .generate_adsr_note_on_envelope(tone.length, tone.last_sustain_value_a),
                 )
             }
             NoteType::NoteOff => {
-                //get last sustain value
-                let (last_sustain_value_a, last_sustain_value_b) =
-                    self.get_last_sustain_values_of_entry(trigger_msg.freq);
-                if let Some(sine_wave_generator) =
-                    self.get_sine_wave_generator_of_entry(trigger_msg.freq)
-                {
-                    tone.sine_wave_generator = sine_wave_generator;
-                };
-                tone.last_sustain_value_a = last_sustain_value_a;
-                tone.last_sustain_value_b = last_sustain_value_b;
                 self.tone_map.remove(tone.freq.clone());
-                tone.adsr_envelope.ts = last_sustain_value_a;
+                tone.adsr_envelope.ts = tone.last_sustain_value_a;
                 tone.envelope = Some(
                     tone.adsr_envelope
                         .generate_adsr_note_off_envelope(tone.length),
