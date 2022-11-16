@@ -95,7 +95,6 @@ impl Adsr {
         }
 
         let len_adsr_env = adsr_env.len() - 1;
-        print!("sp: {} ns: {}\n", startpose, nsamples);
         let tone_index = if startpose + nsamples == 0 {
             0
         } else {
