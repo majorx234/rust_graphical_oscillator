@@ -3,10 +3,10 @@ extern crate wmidi;
 use crate::adsr::Adsr;
 use crate::ctrl_msg::CtrlMsg;
 use crate::jackaudio::SineWaveGenerator;
-use crate::jackmidi::MidiMsg;
 use crate::tone_handling::ToneHandling;
 use crate::trigger_note_msg::{NoteType, TriggerNoteMsg};
 use crate::wave::Wave;
+use oscillator_lib::jackmidi::MidiMsg;
 use std::{thread, time::Duration};
 
 pub fn start_jack_thread(
