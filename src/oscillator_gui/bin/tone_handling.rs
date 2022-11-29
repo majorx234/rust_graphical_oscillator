@@ -1,10 +1,10 @@
-use crate::adsr::Adsr;
 use crate::ctrl_msg::CtrlMsg;
 use crate::jackaudio::SineWaveGenerator;
 use crate::tone::Tone;
 use crate::tone_map::ToneMap;
-use crate::trigger_note_msg::{NoteType, TriggerNoteMsg};
 use crate::wave::Wave;
+use oscillator_lib::adsr::Adsr;
+use oscillator_lib::trigger_note_msg::{NoteType, TriggerNoteMsg};
 
 #[derive(Debug)]
 pub struct ToneHandling {

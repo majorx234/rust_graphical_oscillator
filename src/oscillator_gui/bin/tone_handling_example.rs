@@ -5,11 +5,9 @@ use tone_map::ToneMap;
 mod ctrl_msg;
 use crate::ctrl_msg::CtrlMsg;
 mod tone_handling;
+use oscillator_lib::adsr::Adsr;
+use oscillator_lib::trigger_note_msg::{NoteType, TriggerNoteMsg};
 use tone_handling::ToneHandling;
-mod adsr;
-use crate::adsr::Adsr;
-mod trigger_note_msg;
-use crate::trigger_note_msg::{NoteType, TriggerNoteMsg};
 mod jackaudio;
 mod wave;
 

@@ -5,18 +5,16 @@ use std::sync::mpsc;
 use wmidi;
 mod ctrl_msg;
 mod oscillator_gui;
-mod trigger_note_msg;
 mod wave;
 use oscillator_gui::OscillatorGui;
 use oscillator_lib::jackmidi::MidiMsg;
 mod jackaudio;
 mod jackprocess;
 use jackprocess::start_jack_thread;
-mod adsr;
 mod tone;
 mod tone_handling;
 mod tone_map;
-use crate::trigger_note_msg::{NoteType, TriggerNoteMsg};
+use oscillator_lib::trigger_note_msg::{NoteType, TriggerNoteMsg};
 
 fn main() {
     let (tx_close, rx1_close) = unbounded();

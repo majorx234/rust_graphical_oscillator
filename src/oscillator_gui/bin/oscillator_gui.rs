@@ -1,8 +1,8 @@
-use crate::adsr::Adsr;
 use crate::ctrl_msg::CtrlMsg;
-use crate::trigger_note_msg::{NoteType, TriggerNoteMsg};
 use eframe::egui;
 use eframe::egui::plot::{Line, Plot, Value, Values};
+use oscillator_lib::adsr::Adsr;
+use oscillator_lib::trigger_note_msg::{NoteType, TriggerNoteMsg};
 use oscillator_lib::wave_gen::SineWave;
 
 pub struct OscillatorGui {

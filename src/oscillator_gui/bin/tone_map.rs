@@ -1,6 +1,6 @@
-use crate::adsr::Adsr;
 use crate::tone::Tone;
-use crate::trigger_note_msg::{NoteType, TriggerNoteMsg};
+use oscillator_lib::adsr::Adsr;
+use oscillator_lib::trigger_note_msg::{NoteType, TriggerNoteMsg};
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 
