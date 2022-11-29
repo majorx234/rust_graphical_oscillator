@@ -4,7 +4,6 @@ mod tone_map;
 use oscillator_lib::adsr::Adsr;
 use oscillator_lib::trigger_note_msg::NoteType;
 use tone_map::ToneMap;
-mod ctrl_msg;
 mod jackaudio;
 use crate::jackaudio::SineWaveGenerator;
 mod wave;

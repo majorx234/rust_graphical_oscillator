@@ -3,7 +3,6 @@ use eframe;
 use std::convert::TryFrom;
 use std::sync::mpsc;
 use wmidi;
-mod ctrl_msg;
 mod oscillator_gui;
 mod wave;
 use oscillator_gui::OscillatorGui;

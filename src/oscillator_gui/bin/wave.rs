@@ -1,4 +1,4 @@
-use crate::ctrl_msg::CtrlMsg;
+use oscillator_lib::ctrl_msg::CtrlMsg;
 
 pub trait Wave: Send {
     fn new(frame_size: u32, sample_rate: f32) -> Self

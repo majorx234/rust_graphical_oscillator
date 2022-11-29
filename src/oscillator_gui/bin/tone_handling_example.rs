@@ -1,9 +1,8 @@
 mod tone;
 use tone::Tone;
 mod tone_map;
+use oscillator_lib::ctrl_msg::CtrlMsg;
 use tone_map::ToneMap;
-mod ctrl_msg;
-use crate::ctrl_msg::CtrlMsg;
 mod tone_handling;
 use oscillator_lib::adsr::Adsr;
 use oscillator_lib::trigger_note_msg::{NoteType, TriggerNoteMsg};

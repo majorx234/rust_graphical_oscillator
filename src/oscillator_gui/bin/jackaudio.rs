@@ -1,5 +1,5 @@
-use crate::ctrl_msg::CtrlMsg;
 use crate::wave::Wave;
+use oscillator_lib::ctrl_msg::CtrlMsg;
 use oscillator_lib::wave_gen::SineWave;
 
 #[derive(Debug, Clone)]
