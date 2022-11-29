@@ -1,6 +1,6 @@
+use crate::adsr::Adsr;
 use crate::jackaudio::SineWaveGenerator;
-use oscillator_lib::adsr::Adsr;
-use oscillator_lib::trigger_note_msg::NoteType;
+use crate::trigger_note_msg::NoteType;
 
 #[derive(Debug)]
 pub struct Tone {

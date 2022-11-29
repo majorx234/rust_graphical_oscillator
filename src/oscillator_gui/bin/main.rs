@@ -4,15 +4,10 @@ use std::convert::TryFrom;
 use std::sync::mpsc;
 use wmidi;
 mod oscillator_gui;
-mod wave;
 use oscillator_gui::OscillatorGui;
 use oscillator_lib::jackmidi::MidiMsg;
-mod jackaudio;
 mod jackprocess;
 use jackprocess::start_jack_thread;
-mod tone;
-mod tone_handling;
-mod tone_map;
 use oscillator_lib::trigger_note_msg::{NoteType, TriggerNoteMsg};
 
 fn main() {

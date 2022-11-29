@@ -1,14 +1,9 @@
-mod tone;
-use tone::Tone;
-mod tone_map;
-use oscillator_lib::ctrl_msg::CtrlMsg;
-use tone_map::ToneMap;
-mod tone_handling;
 use oscillator_lib::adsr::Adsr;
+use oscillator_lib::ctrl_msg::CtrlMsg;
+use oscillator_lib::tone::Tone;
+use oscillator_lib::tone_handling::ToneHandling;
+use oscillator_lib::tone_map::ToneMap;
 use oscillator_lib::trigger_note_msg::{NoteType, TriggerNoteMsg};
-use tone_handling::ToneHandling;
-mod jackaudio;
-mod wave;
 
 fn main() {
     let frame_size: usize = 1024;

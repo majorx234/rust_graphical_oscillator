@@ -1,13 +1,9 @@
-mod tone;
-use tone::Tone;
-mod tone_map;
 use oscillator_lib::adsr::Adsr;
+use oscillator_lib::jackaudio::SineWaveGenerator;
+use oscillator_lib::tone::Tone;
+use oscillator_lib::tone_map::ToneMap;
 use oscillator_lib::trigger_note_msg::NoteType;
-use tone_map::ToneMap;
-mod jackaudio;
-use crate::jackaudio::SineWaveGenerator;
-mod wave;
-use crate::wave::Wave;
+use oscillator_lib::wave::Wave;
 
 fn main() {
     let mut tone_map = ToneMap::new();
