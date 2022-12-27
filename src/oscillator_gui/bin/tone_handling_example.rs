@@ -30,10 +30,20 @@ fn main() {
         num_samples: 96000,
     };
 
+    let mut multiply_out_l: Vec<f32> = vec![1.0; 1024];
+    let mut multiply_out_r: Vec<f32> = vec![1.0; 1024];
+
     for _ in [0..10] {
         let mut out_l: [f32; 1024] = [0.0; 1024];
         let mut out_r: [f32; 1024] = [0.0; 1024];
-        tone_handling.process_tones(&ctrl_msg, &mut out_l, &mut out_r, frame_size);
+        tone_handling.process_tones(
+            &ctrl_msg,
+            &mut out_l,
+            &mut out_r,
+            &mut multiply_out_l,
+            &mut multiply_out_r,
+            1024,
+        );
     }
 
     let trigger_msg2 = TriggerNoteMsg {
@@ -49,6 +59,13 @@ fn main() {
     for _ in [0..10] {
         let mut out_l: [f32; 1024] = [0.0; 1024];
         let mut out_r: [f32; 1024] = [0.0; 1024];
-        tone_handling.process_tones(&ctrl_msg, &mut out_l, &mut out_r, frame_size);
+        tone_handling.process_tones(
+            &ctrl_msg,
+            &mut out_l,
+            &mut out_r,
+            &mut multiply_out_l,
+            &mut multiply_out_r,
+            1024,
+        );
     }
 }

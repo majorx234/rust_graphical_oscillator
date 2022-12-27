@@ -31,6 +31,10 @@ impl ToneMap {
         self.hm.get(&ufreq_index)
     }
 
+    pub fn len(&self) -> usize {
+        self.hm.len()
+    }
+
     pub fn print(&self) {
         println!("{:?}", self.hm);
     }

@@ -60,6 +60,9 @@ pub fn start_jack_thread(
             let out_a_p = out_a.as_mut_slice(ps);
             let out_b_p = out_b.as_mut_slice(ps);
 
+            let mut multiply_out_l: Vec<f32> = vec![1.0; frame_size];
+            let mut multiply_out_r: Vec<f32> = vec![1.0; frame_size];
+
             match rx_ctrl.try_recv() {
                 Ok(rx_ctrl_msg) => ctrl_msg = rx_ctrl_msg,
                 Err(_) => {}
@@ -75,7 +78,24 @@ pub fn start_jack_thread(
                 }
                 Err(_) => {}
             }
-            tone_handling.process_tones(&ctrl_msg, out_a_p, out_b_p, frame_size);
+
+            tone_handling.process_tones(
+                &ctrl_msg,
+                out_a_p,
+                out_b_p,
+                &mut multiply_out_l,
+                &mut multiply_out_r,
+                frame_size,
+            );
+
+            tone_handling.normalize_out(
+                out_a_p,
+                out_b_p,
+                &mut multiply_out_l,
+                &mut multiply_out_r,
+                frame_size,
+            );
+
             jack::Control::Continue
         };
 

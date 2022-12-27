@@ -59,11 +59,32 @@ impl ToneHandling {
         self.tone_map.insert(tone.freq, tone);
     }
 
+    pub fn normalize_out(
+        &self,
+        output_l: &mut [f32],
+        output_r: &mut [f32],
+        multiply_output_l: &mut [f32],
+        multiply_output_r: &mut [f32],
+        frame_size: usize,
+    ) {
+        let count_tones: f32 = if self.tone_map.len() == 0 {
+            0.0
+        } else {
+            (self.tone_map.len() - 1) as f32
+        };
+        for index in 0..frame_size {
+            output_l[index] -= multiply_output_l[index] * count_tones;
+            output_r[index] -= multiply_output_r[index] * count_tones;
+        }
+    }
+
     pub fn process_tones(
         &mut self,
         ctrl_msg: &CtrlMsg,
         output_l: &mut [f32],
         output_r: &mut [f32],
+        multiply_output_l: &mut [f32],
+        multiply_output_r: &mut [f32],
         frame_size: usize,
     ) {
         output_l.fill(0.0);
@@ -103,6 +124,8 @@ impl ToneHandling {
                 for index in 0..frame_size {
                     output_l[index] += frame_l[index];
                     output_r[index] += frame_r[index];
+                    multiply_output_l[index] *= frame_l[index];
+                    multiply_output_r[index] *= frame_r[index];
                 }
 
                 if tone.start_pose as f32 > tone.adsr_envelope.tr * tone.length as f32
