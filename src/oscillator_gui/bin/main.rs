@@ -17,7 +17,7 @@ fn main() {
     let (tx_adsr, rx_adsr) = mpsc::channel();
     let (tx_trigger, rx_trigger) = mpsc::channel();
     let tx_trigger2 = tx_trigger.clone();
-    let (tx_note_volume, rx_note_volume): (
+    let (tx_note_velocity, rx_note_velocity): (
         std::sync::mpsc::Sender<TriggerNoteMsg>,
         std::sync::mpsc::Receiver<TriggerNoteMsg>,
     ) = mpsc::channel();
@@ -34,30 +34,30 @@ fn main() {
             if let Ok(message) = wmidi::MidiMessage::try_from(bytes) {
                 match message {
                     wmidi::MidiMessage::NoteOn(_, note, val) => {
-                        let volume = u8::from(val) as f32 / 127.0;
+                        let velocity = u8::from(val) as f32 / 127.0;
                         let note_on_msg = TriggerNoteMsg {
                             note_type: NoteType::NoteOn,
                             freq: note.to_freq_f32(),
-                            velocity: volume,
+                            velocity: velocity,
                             length: 96000,
                         };
-                        tx_note_volume.send(note_on_msg.clone()).unwrap();
+                        tx_note_velocity.send(note_on_msg.clone()).unwrap();
                         tx_trigger2.send(note_on_msg).unwrap();
 
-                        println!("NoteOn {} at volume {}", note, volume);
+                        println!("NoteOn {} at velocity {}", note, velocity);
                     }
                     wmidi::MidiMessage::NoteOff(_, note, val) => {
-                        let volume = u8::from(val) as f32 / 127.0;
+                        let velocity = u8::from(val) as f32 / 127.0;
                         let note_off_msg = TriggerNoteMsg {
                             note_type: NoteType::NoteOff,
                             freq: note.to_freq_f32(),
-                            velocity: volume,
+                            velocity: velocity,
                             length: 96000,
                         };
-                        tx_note_volume.send(note_off_msg.clone()).unwrap();
+                        tx_note_velocity.send(note_off_msg.clone()).unwrap();
                         tx_trigger2.send(note_off_msg).unwrap();
 
-                        println!("NoteOff {} at volume {}", note, volume);
+                        println!("NoteOff {} at velocity {}", note, velocity);
                     }
                     message => println!("{:?}", message),
                 }
@@ -78,6 +78,8 @@ fn main() {
     let jack_thread = start_jack_thread(rx2_close, rx_ctrl, rx_adsr, rx_trigger, midi_sender);
     let graphical_osci_app = OscillatorGui {
         freq: 44.0,
+        velocity: 1.0,
+        volume: 1.0,
         intensity_am: 1.0,
         freq_am: 0.0,
         phase_am: 0.0,
@@ -94,7 +96,7 @@ fn main() {
         tx_ctrl: Some(tx_ctrl),
         tx_adsr: Some(tx_adsr),
         tx_trigger: Some(tx_trigger),
-        rx_note_volume: Some(rx_note_volume),
+        rx_note_velocity: Some(rx_note_velocity),
     };
     let mut options = eframe::NativeOptions::default();
     let window_size: eframe::egui::Vec2 = eframe::egui::Vec2::new(800.0, 600.0);

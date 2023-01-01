@@ -71,6 +71,7 @@ impl Adsr {
         frame_size: usize,
         note_type: NoteType,
         last_sustain_value: &mut f32,
+        velocity: f32,
     ) {
         let (sample_length, factor): (usize, f32) = match note_type {
             NoteType::NoteOn => ((size as f32 * (self.ta + self.td)) as usize, self.ts),
@@ -88,10 +89,10 @@ impl Adsr {
         }
 
         for n in 0..nsamples {
-            in_audio[n] *= adsr_env[n + startpose];
+            in_audio[n] *= velocity * adsr_env[n + startpose];
         }
         for n in nsamples..frame_size {
-            in_audio[n] *= factor;
+            in_audio[n] *= velocity * factor;
         }
 
         let len_adsr_env = adsr_env.len() - 1;

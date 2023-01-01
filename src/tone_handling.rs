@@ -23,7 +23,7 @@ impl ToneHandling {
             length: trigger_msg.length,
             note_type: trigger_msg.note_type,
             freq: trigger_msg.freq,
-            volume: trigger_msg.velocity,
+            velocity: trigger_msg.velocity,
             start_pose: 0,
             adsr_envelope: adsr_envelope.clone(),
             envelope: None,
@@ -107,6 +107,7 @@ impl ToneHandling {
                             frame_size,
                             tone.note_type,
                             &mut tone.last_sustain_value_a,
+                            tone.velocity,
                         );
                         tone.adsr_envelope.multiply_buf(
                             &mut frame_r,
@@ -116,6 +117,7 @@ impl ToneHandling {
                             frame_size,
                             tone.note_type,
                             &mut tone.last_sustain_value_b,
+                            tone.velocity,
                         );
                     }
                     None => (),

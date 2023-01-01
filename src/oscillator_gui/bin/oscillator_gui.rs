@@ -7,6 +7,8 @@ use oscillator_lib::wave_gen::SineWave;
 
 pub struct OscillatorGui {
     pub freq: f32,
+    pub velocity: f32,
+    pub volume: f32,
     pub intensity_am: f32,
     pub freq_am: f32,
     pub phase_am: f32,
@@ -23,13 +25,15 @@ pub struct OscillatorGui {
     pub tx_ctrl: Option<std::sync::mpsc::Sender<CtrlMsg>>,
     pub tx_adsr: Option<std::sync::mpsc::Sender<Adsr>>,
     pub tx_trigger: Option<std::sync::mpsc::Sender<TriggerNoteMsg>>,
-    pub rx_note_volume: Option<std::sync::mpsc::Receiver<TriggerNoteMsg>>,
+    pub rx_note_velocity: Option<std::sync::mpsc::Receiver<TriggerNoteMsg>>,
 }
 
 impl Default for OscillatorGui {
     fn default() -> Self {
         Self {
             freq: 44.0,
+            velocity: 1.0,
+            volume: 1.0,
             intensity_am: 1.0,
             freq_am: 0.0,
             phase_am: 0.0,
@@ -46,7 +50,7 @@ impl Default for OscillatorGui {
             tx_ctrl: None,
             tx_adsr: None,
             tx_trigger: None,
-            rx_note_volume: None,
+            rx_note_velocity: None,
         }
     }
 }
@@ -65,12 +69,12 @@ impl eframe::App for OscillatorGui {
             self.num_samples,
             0,
         );
-        let mut _volume: f32 = 0.0;
-        match &self.rx_note_volume {
-            Some(rx_note_volume) => match rx_note_volume.try_recv() {
+        let mut _velocity: f32 = 0.0;
+        match &self.rx_note_velocity {
+            Some(rx_note_velocity) => match rx_note_velocity.try_recv() {
                 Ok(trigger_note_msg) => {
                     self.freq = trigger_note_msg.freq;
-                    _volume = trigger_note_msg.velocity;
+                    _velocity = trigger_note_msg.velocity;
                 }
                 Err(_) => {}
             },
@@ -123,6 +127,8 @@ impl eframe::App for OscillatorGui {
                 ui.horizontal(|ui| {
                     ui.label("Freq Base: ");
                     ui.add(egui::DragValue::new(&mut self.freq).speed(1.0));
+                    ui.label("Volume: ");
+                    ui.add(egui::Slider::new(&mut self.volume, 0.0..=1.0));
                 });
                 ui.horizontal(|ui| {
                     ui.label("Intensity AM: ");
@@ -176,7 +182,7 @@ impl eframe::App for OscillatorGui {
                                 let trigger_note = TriggerNoteMsg {
                                     note_type: NoteType::NoteOn,
                                     freq: self.freq,
-                                    velocity: 0.0,
+                                    velocity: 1.0,
                                     length: self.length,
                                 };
                                 x.send(trigger_note).unwrap();
@@ -190,7 +196,7 @@ impl eframe::App for OscillatorGui {
                                     let trigger_note_off = TriggerNoteMsg {
                                         note_type: NoteType::NoteOff,
                                         freq: self.freq,
-                                        velocity: 0.0,
+                                        velocity: 1.0,
                                         length: self.length,
                                     };
                                     x.send(trigger_note_off).unwrap();

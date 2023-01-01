@@ -13,7 +13,7 @@ fn main() {
         length: 96000,
         note_type: NoteType::NoteOn,
         freq: 440.0,
-        volume: 0.9,
+        velocity: 0.9,
         start_pose: 0,
         adsr_envelope: Adsr::new(0.1, 0.2, 0.5, 0.2),
         envelope: None,
