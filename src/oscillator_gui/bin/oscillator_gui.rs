@@ -182,7 +182,7 @@ impl eframe::App for OscillatorGui {
                                 let trigger_note = TriggerNoteMsg {
                                     note_type: NoteType::NoteOn,
                                     freq: self.freq,
-                                    velocity: 1.0,
+                                    velocity: self.velocity,
                                     length: self.length,
                                 };
                                 x.send(trigger_note).unwrap();
@@ -196,7 +196,7 @@ impl eframe::App for OscillatorGui {
                                     let trigger_note_off = TriggerNoteMsg {
                                         note_type: NoteType::NoteOff,
                                         freq: self.freq,
-                                        velocity: 1.0,
+                                        velocity: self.velocity,
                                         length: self.length,
                                     };
                                     x.send(trigger_note_off).unwrap();
@@ -205,6 +205,8 @@ impl eframe::App for OscillatorGui {
                             }
                         }
                     }
+                    ui.add(egui::Slider::new(&mut self.velocity, 0.0..=1.0));
+
                     if ui.button("close").clicked() {
                         match &self.tx_close {
                             Some(x) => {
