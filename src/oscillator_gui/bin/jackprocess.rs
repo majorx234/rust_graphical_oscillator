@@ -63,21 +63,17 @@ pub fn start_jack_thread(
             let mut multiply_out_l: Vec<f32> = vec![1.0; frame_size];
             let mut multiply_out_r: Vec<f32> = vec![1.0; frame_size];
 
-            match rx_ctrl.try_recv() {
-                Ok(rx_ctrl_msg) => ctrl_msg = rx_ctrl_msg,
-                Err(_) => {}
-            };
-            match rx_adsr.try_recv() {
-                Ok(rx_adsr_msg) => adsr_envelope = rx_adsr_msg,
-                Err(_) => {}
+            if let Ok(rx_ctrl_msg) = rx_ctrl.try_recv() {
+                ctrl_msg = rx_ctrl_msg;
             };
 
-            match rx_trigger.try_recv() {
-                Ok(rx_trigger_msg) => {
-                    tone_handling.add_note_msg(rx_trigger_msg, adsr_envelope.clone());
-                }
-                Err(_) => {}
-            }
+            if let Ok(rx_adsr_msg) = rx_adsr.try_recv() {
+                adsr_envelope = rx_adsr_msg;
+            };
+
+            if let Ok(rx_trigger_msg) = rx_trigger.try_recv() {
+                tone_handling.add_note_msg(rx_trigger_msg, adsr_envelope.clone());
+            };
 
             tone_handling.process_tones(
                 &ctrl_msg,
