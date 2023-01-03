@@ -33,6 +33,10 @@ impl ToneMap {
         self.hm.len()
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.hm.is_empty()
+    }
+
     pub fn print(&self) {
         println!("{:?}", self.hm);
     }
