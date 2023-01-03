@@ -59,6 +59,7 @@ impl eframe::App for OscillatorGui {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         let my_sine = SineWave::new(
             self.freq,
+            self.volume,
             self.intensity_am,
             self.freq_am,
             self.phase_am,
@@ -89,6 +90,7 @@ impl eframe::App for OscillatorGui {
             freq_fm: self.freq_fm,
             phase_fm: self.phase_fm,
             num_samples: self.num_samples,
+            volume: self.volume,
         };
         match &self.tx_ctrl {
             Some(x) => x.send(msg).unwrap(),

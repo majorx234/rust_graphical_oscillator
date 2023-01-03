@@ -3,6 +3,7 @@ use std::f32;
 #[derive(Debug)]
 pub struct SineWave {
     freq_base: f32,
+    amplitude: f32,
     intensity_am: f32,
     freq_am: f32,
     phase_am: f32,
@@ -17,6 +18,7 @@ pub struct SineWave {
 impl SineWave {
     pub fn new(
         freq_base: f32,
+        amplitude: f32,
         intensity_am: f32,
         freq_am: f32,
         phase_am: f32,
@@ -29,6 +31,7 @@ impl SineWave {
     ) -> SineWave {
         return SineWave {
             freq_base: freq_base,
+            amplitude: amplitude,
             intensity_am: intensity_am,
             freq_am: freq_am,
             phase_am: phase_am,

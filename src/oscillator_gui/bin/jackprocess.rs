@@ -44,6 +44,7 @@ pub fn start_jack_thread(
             freq_fm: 0.0,
             phase_fm: 0.0,
             num_samples: frame_size,
+            volume: 1.0,
         };
         let sound_length = 96000; // value of length of a synth sample
                                   //TODO:  paramter in gui or depending of midi touched key

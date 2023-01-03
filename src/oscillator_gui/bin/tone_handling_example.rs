@@ -26,6 +26,7 @@ fn main() {
         freq_fm: 0.0,
         phase_fm: 0.0,
         num_samples: 96000,
+        volume: 1.0,
     };
 
     let mut multiply_out_l: Vec<f32> = vec![1.0; 1024];
