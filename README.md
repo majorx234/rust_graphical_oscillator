@@ -34,7 +34,7 @@ cargo run
 ```
 
 # ToDo 
-- better mixing of polyphone tones
+- Add windowing to prevent clipping
 - LP,BP,HP filter
 - Effects
 - put wave generation in extra thread and copy data via ring buffer
@@ -44,7 +44,8 @@ cargo run
 - update GUI with visualization of ADSR
 
 # History
-- 20221025 polyphon tone generartion over midi
+- 20221230 velocity sensitive Midi control of tones
+- 20221025 polyphon tone generation over midi
 - 20220825 add trigger to play sound with envelope
 - 20220720 jack sound output is working
 - 20220712 first version with visualization of AM and FM 
