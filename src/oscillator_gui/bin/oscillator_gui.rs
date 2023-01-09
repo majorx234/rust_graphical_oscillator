@@ -170,7 +170,7 @@ impl eframe::App for OscillatorGui {
                     ui.add(egui::Slider::new(&mut self.release, 0.0..=1.0));
                 });
                 ui.horizontal(|ui| {
-                    ui.label("length: ");
+                    ui.label("Length: ");
                     ui.add(egui::Slider::new(&mut self.length, 0..=192000));
 
                     let trigger_button = ui.button("trigger").interact(egui::Sense {
@@ -207,6 +207,8 @@ impl eframe::App for OscillatorGui {
                             }
                         }
                     }
+
+                    ui.label("Velocity: ");
                     ui.add(egui::Slider::new(&mut self.velocity, 0.0..=1.0));
 
                     if ui.button("close").clicked() {
