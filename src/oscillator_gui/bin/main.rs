@@ -64,10 +64,9 @@ fn main() {
             }
 
             let mut run: bool = true;
-            match rx1_close.try_recv() {
-                Ok(running) => (run = running),
-                Err(_) => (),
-            }
+            if let Ok(running) = rx1_close.try_recv() {
+                run = running;
+            };
             if !run {
                 break;
             }

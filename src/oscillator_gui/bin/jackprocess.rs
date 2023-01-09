@@ -100,8 +100,8 @@ pub fn start_jack_thread(
         while run {
             thread::sleep(Duration::from_millis(100));
             match rx_close.recv() {
-                Ok(running) => (run = running),
-                Err(_) => (run = false),
+                Ok(running) => run = running,
+                Err(_) => run = false,
             }
         }
         match active_client.deactivate() {
