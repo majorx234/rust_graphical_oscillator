@@ -1,5 +1,6 @@
 pub mod adsr;
 pub mod ctrl_msg;
+pub mod delay;
 pub mod effect;
 pub mod jackaudio;
 pub mod jackmidi;
