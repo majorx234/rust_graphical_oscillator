@@ -1,8 +1,9 @@
+use crossbeam_channel::unbounded;
 use eframe::egui;
 use eframe::egui::plot::{Line, Plot, Value, Values};
 use oscillator_lib::adsr::Adsr;
 use oscillator_lib::ctrl_msg::CtrlMsg;
-use oscillator_lib::trigger_note_msg::{NoteType, TriggerNoteMsg};
+use oscillator_lib::trigger_note_msg::{self, NoteType, TriggerNoteMsg};
 use oscillator_lib::wave_gen::SineWave;
 use std::thread;
 use std::time::Duration;
@@ -65,8 +66,13 @@ impl eframe::App for OscillatorGui {
         if self.init_repainter {
             // singleton pattern as setup()
             let ctx = ctx.clone();
-            thread::spawn(|| repainter(ctx));
-
+            if let Some(rx_note_velocity) = &self.rx_note_velocity {
+                let rx_note_velocity2 = rx_note_velocity.clone();
+                //need a chain of crossbeam channels
+                let (tx_note_velocity, rx_note_velocity) = unbounded();
+                thread::spawn(|| repainter(ctx, Some(rx_note_velocity2), Some(tx_note_velocity)));
+                self.rx_note_velocity = Some(rx_note_velocity);
+            }
             self.init_repainter = false;
         }
         let my_sine = SineWave::new(
@@ -85,6 +91,7 @@ impl eframe::App for OscillatorGui {
         let mut _velocity: f32 = 0.0;
         if let Some(rx_note_velocity) = &self.rx_note_velocity {
             if let Ok(trigger_note_msg) = rx_note_velocity.try_recv() {
+                println!("crossbeam recved");
                 self.freq = trigger_note_msg.freq;
                 _velocity = trigger_note_msg.velocity;
             };
@@ -218,10 +225,21 @@ impl eframe::App for OscillatorGui {
     }
 }
 
-fn repainter(ctx: egui::Context) {
-    let one_second = Duration::from_secs(1);
-    loop {
-        thread::sleep(one_second);
-        ctx.request_repaint();
+fn repainter(
+    ctx: egui::Context,
+    rx_note_velocity: Option<crossbeam_channel::Receiver<TriggerNoteMsg>>,
+    tx_note_velocity: Option<crossbeam_channel::Sender<TriggerNoteMsg>>,
+) {
+    if let Some(rx_note_velocity) = rx_note_velocity {
+        // let one_second = Duration::from_secs(1);
+        loop {
+            if let Ok(trigger_note_msg) = rx_note_velocity.recv() {
+                if let Some(ref tx_note_velocity) = tx_note_velocity {
+                    tx_note_velocity.send(trigger_note_msg);
+                }
+            }
+            ctx.request_repaint();
+            print!("repaint\n");
+        }
     }
 }
