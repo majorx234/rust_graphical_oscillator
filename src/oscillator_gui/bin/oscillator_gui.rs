@@ -4,6 +4,8 @@ use oscillator_lib::adsr::Adsr;
 use oscillator_lib::ctrl_msg::CtrlMsg;
 use oscillator_lib::trigger_note_msg::{NoteType, TriggerNoteMsg};
 use oscillator_lib::wave_gen::SineWave;
+use std::thread;
+use std::time::Duration;
 
 pub struct OscillatorGui {
     pub freq: f32,
@@ -52,12 +54,21 @@ impl Default for OscillatorGui {
             tx_adsr: None,
             tx_trigger: None,
             rx_note_velocity: None,
+            init_repainter: true,
         }
     }
 }
 
 impl eframe::App for OscillatorGui {
+    /// Called once before the first frame.
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        if self.init_repainter {
+            // singleton pattern as setup()
+            let ctx = ctx.clone();
+            thread::spawn(|| repainter(ctx));
+
+            self.init_repainter = false;
+        }
         let my_sine = SineWave::new(
             self.freq,
             self.volume,
@@ -203,6 +214,14 @@ impl eframe::App for OscillatorGui {
                 })
             });
         });
+        //        ctx.request_repaint();
+    }
+}
+
+fn repainter(ctx: egui::Context) {
+    let one_second = Duration::from_secs(1);
+    loop {
+        thread::sleep(one_second);
         ctx.request_repaint();
     }
 }

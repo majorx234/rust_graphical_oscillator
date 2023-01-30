@@ -96,6 +96,7 @@ fn main() {
         tx_adsr: Some(tx_adsr),
         tx_trigger: Some(tx_trigger),
         rx_note_velocity: Some(rx_note_velocity),
+        init_repainter: true,
     };
     let mut options = eframe::NativeOptions::default();
     let window_size: eframe::egui::Vec2 = eframe::egui::Vec2::new(800.0, 600.0);
