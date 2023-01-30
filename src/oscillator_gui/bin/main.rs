@@ -18,9 +18,9 @@ fn main() {
     let (tx_trigger, rx_trigger) = mpsc::channel();
     let tx_trigger2 = tx_trigger.clone();
     let (tx_note_velocity, rx_note_velocity): (
-        std::sync::mpsc::Sender<TriggerNoteMsg>,
-        std::sync::mpsc::Receiver<TriggerNoteMsg>,
-    ) = mpsc::channel();
+        crossbeam_channel::Sender<TriggerNoteMsg>,
+        crossbeam_channel::Receiver<TriggerNoteMsg>,
+    ) = unbounded();
     let (midi_sender, midi_receiver): (
         std::sync::mpsc::SyncSender<MidiMsg>,
         std::sync::mpsc::Receiver<MidiMsg>,

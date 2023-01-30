@@ -25,7 +25,8 @@ pub struct OscillatorGui {
     pub tx_ctrl: Option<std::sync::mpsc::Sender<CtrlMsg>>,
     pub tx_adsr: Option<std::sync::mpsc::Sender<Adsr>>,
     pub tx_trigger: Option<std::sync::mpsc::Sender<TriggerNoteMsg>>,
-    pub rx_note_velocity: Option<std::sync::mpsc::Receiver<TriggerNoteMsg>>,
+    pub rx_note_velocity: Option<crossbeam_channel::Receiver<TriggerNoteMsg>>,
+    pub init_repainter: bool,
 }
 
 impl Default for OscillatorGui {
