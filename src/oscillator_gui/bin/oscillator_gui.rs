@@ -71,16 +71,12 @@ impl eframe::App for OscillatorGui {
             0,
         );
         let mut _velocity: f32 = 0.0;
-        match &self.rx_note_velocity {
-            Some(rx_note_velocity) => match rx_note_velocity.try_recv() {
-                Ok(trigger_note_msg) => {
-                    self.freq = trigger_note_msg.freq;
-                    _velocity = trigger_note_msg.velocity;
-                }
-                Err(_) => {}
-            },
-            None => {}
-        }
+        if let Some(rx_note_velocity) = &self.rx_note_velocity {
+            if let Ok(trigger_note_msg) = rx_note_velocity.try_recv() {
+                self.freq = trigger_note_msg.freq;
+                _velocity = trigger_note_msg.velocity;
+            };
+        };
         let msg = CtrlMsg {
             size: 1024,
             intensity_am: self.intensity_am,
@@ -92,11 +88,8 @@ impl eframe::App for OscillatorGui {
             num_samples: self.num_samples,
             volume: self.volume,
         };
-        match &self.tx_ctrl {
-            Some(x) => x.send(msg).unwrap(),
-            None => {
-                println!("No tx_ctrl\n");
-            }
+        if let Some(x) = &self.tx_ctrl {
+            x.send(msg).unwrap();
         }
         let msg_adsr = Adsr {
             ta: self.attack,
@@ -104,12 +97,8 @@ impl eframe::App for OscillatorGui {
             ts: self.sustain,
             tr: self.release,
         };
-        match &self.tx_adsr {
-            Some(x) => x.send(msg_adsr).unwrap(),
-
-            None => {
-                println!("No tx_adsr\n");
-            }
+        if let Some(x) = &self.tx_adsr {
+            x.send(msg_adsr).unwrap();
         }
         let (values_size, values_data) = my_sine.gen_values();
         let wave = (0..values_size).map(|i| {
@@ -179,48 +168,36 @@ impl eframe::App for OscillatorGui {
                         focusable: true,
                     });
                     if trigger_button.drag_started() {
-                        match &self.tx_trigger {
-                            Some(x) => {
-                                let trigger_note = TriggerNoteMsg {
-                                    note_type: NoteType::NoteOn,
+                        if let Some(x) = &self.tx_trigger {
+                            let trigger_note = TriggerNoteMsg {
+                                note_type: NoteType::NoteOn,
+                                freq: self.freq,
+                                velocity: self.velocity,
+                                length: self.length,
+                            };
+                            x.send(trigger_note).unwrap();
+                        }
+                    } else {
+                        if trigger_button.drag_released() {
+                            if let Some(x) = &self.tx_trigger {
+                                let trigger_note_off = TriggerNoteMsg {
+                                    note_type: NoteType::NoteOff,
                                     freq: self.freq,
                                     velocity: self.velocity,
                                     length: self.length,
                                 };
-                                x.send(trigger_note).unwrap();
-                            }
-                            None => (),
-                        }
-                    } else {
-                        if trigger_button.drag_released() {
-                            match &self.tx_trigger {
-                                Some(x) => {
-                                    let trigger_note_off = TriggerNoteMsg {
-                                        note_type: NoteType::NoteOff,
-                                        freq: self.freq,
-                                        velocity: self.velocity,
-                                        length: self.length,
-                                    };
-                                    x.send(trigger_note_off).unwrap();
-                                }
-                                None => (),
+                                x.send(trigger_note_off).unwrap();
                             }
                         }
                     }
-
                     ui.label("Velocity: ");
                     ui.add(egui::Slider::new(&mut self.velocity, 0.0..=1.0));
 
                     if ui.button("close").clicked() {
-                        match &self.tx_close {
-                            Some(x) => {
-                                x.send(false).unwrap();
-                                _frame.quit();
-                            }
-                            None => {
-                                println!("No tx_close\n");
-                            }
-                        }
+                        if let Some(x) = &self.tx_close {
+                            x.send(false).unwrap();
+                            _frame.quit();
+                        };
                     }
                 })
             });
