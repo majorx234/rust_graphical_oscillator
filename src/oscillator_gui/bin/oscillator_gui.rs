@@ -225,5 +225,6 @@ impl eframe::App for OscillatorGui {
                 })
             });
         });
+        ctx.request_repaint();
     }
 }
