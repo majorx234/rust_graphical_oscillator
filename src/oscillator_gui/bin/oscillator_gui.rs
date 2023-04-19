@@ -76,14 +76,14 @@ impl eframe::App for OscillatorGui {
             self.init_repainter = false;
         }
         let my_sine = SineWave::new(
-            self.freq,
-            self.volume,
-            self.intensity_am,
-            self.freq_am,
-            self.phase_am,
-            self.intensity_fm,
-            self.freq_fm,
-            self.phase_fm,
+            self.freq as f64,
+            self.volume as f64,
+            self.intensity_am as f64,
+            self.freq_am as f64,
+            self.phase_am as f64,
+            self.intensity_fm as f64,
+            self.freq_fm as f64,
+            self.phase_fm as f64,
             48000.0,
             self.num_samples,
             0,

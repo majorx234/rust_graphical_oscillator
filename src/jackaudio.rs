@@ -36,15 +36,15 @@ impl Wave for SineWaveGenerator {
 
     fn process_samples(&mut self, output_l: &mut [f32], output_r: &mut [f32]) {
         let my_sine = SineWave::new(
-            self.freq,
-            self.amplitude,
-            self.intensity_am,
-            self.freq_am,
-            self.phase_am,
-            self.intensity_fm,
-            self.freq_fm,
-            self.phase_fm,
-            self.fs,
+            self.freq as f64,
+            self.amplitude as f64,
+            self.intensity_am as f64,
+            self.freq_am as f64,
+            self.phase_am as f64,
+            self.intensity_fm as f64,
+            self.freq_fm as f64,
+            self.phase_fm as f64,
+            self.fs as f64,
             self.frame_size as usize,
             self.offset,
         );
