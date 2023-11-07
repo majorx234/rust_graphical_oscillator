@@ -239,7 +239,6 @@ fn repainter(
                 }
             }
             ctx.request_repaint();
-            print!("repaint\n");
         }
     }
 }

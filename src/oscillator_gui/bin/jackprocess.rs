@@ -5,7 +5,7 @@ use oscillator_lib::ctrl_msg::CtrlMsg;
 use oscillator_lib::jackmidi::MidiMsg;
 use oscillator_lib::tone_handling::ToneHandling;
 use oscillator_lib::trigger_note_msg::TriggerNoteMsg;
-use std::{thread, time::Duration};
+use std::{process::exit, thread, time::Duration};
 
 pub fn start_jack_thread(
     rx_close: crossbeam_channel::Receiver<bool>,
@@ -32,8 +32,18 @@ pub fn start_jack_thread(
             .register_port("gosci_midi_in", jack::MidiIn::default())
             .unwrap();
 
-        // get frame size
-        let frame_size = client.buffer_size() as usize;
+        let mut frame_size = client.buffer_size() as usize;
+        if let Ok(_) = client.set_buffer_size(frame_size as u32) {
+            // get frame size
+            let frame_size = client.buffer_size() as usize;
+            println!(
+                "client started with samplerate: {} and frame_size: {}",
+                sample_rate, frame_size
+            );
+        } else {
+            exit(-1);
+        }
+
         let mut tone_handling = ToneHandling::new();
         let mut ctrl_msg = CtrlMsg {
             size: 0,
@@ -58,6 +68,10 @@ pub fn start_jack_thread(
             }
             let out_a_p = out_a.as_mut_slice(ps);
             let out_b_p = out_b.as_mut_slice(ps);
+
+            // zero the ringbuffer
+            out_a_p.fill(0.0);
+            out_b_p.fill(0.0);
 
             let mut multiply_out_l: Vec<f32> = vec![1.0; frame_size];
             let mut multiply_out_r: Vec<f32> = vec![1.0; frame_size];
