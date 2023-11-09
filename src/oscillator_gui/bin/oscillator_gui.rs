@@ -3,10 +3,9 @@ use eframe::egui;
 use eframe::egui::plot::{Line, Plot, Value, Values};
 use oscillator_lib::adsr::Adsr;
 use oscillator_lib::ctrl_msg::CtrlMsg;
-use oscillator_lib::trigger_note_msg::{self, NoteType, TriggerNoteMsg};
+use oscillator_lib::trigger_note_msg::{NoteType, TriggerNoteMsg};
 use oscillator_lib::wave_gen::SineWave;
 use std::thread;
-use std::time::Duration;
 
 pub struct OscillatorGui {
     pub freq: f32,

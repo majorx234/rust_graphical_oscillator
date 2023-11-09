@@ -17,7 +17,12 @@ impl ToneHandling {
             tone_map: ToneMap::new(),
         }
     }
-    pub fn add_note_msg(&mut self, trigger_msg: TriggerNoteMsg, adsr_envelope: Adsr) {
+    pub fn add_note_msg(
+        &mut self,
+        trigger_msg: TriggerNoteMsg,
+        adsr_envelope: Adsr,
+        frame_size: usize,
+    ) {
         let mut tone: Tone = Tone {
             playing: true,
             length: trigger_msg.length,
@@ -29,7 +34,7 @@ impl ToneHandling {
             envelope: None,
             last_sustain_value_a: 0.0,
             last_sustain_value_b: 0.0,
-            sine_wave_generator: SineWaveGenerator::new(1024, 48000.0),
+            sine_wave_generator: SineWaveGenerator::new(frame_size, 48000.0),
         };
 
         //get last sustain value
@@ -91,8 +96,8 @@ impl ToneHandling {
         output_r.fill(0.0);
         self.tone_map
             .iterate_over_tones(Box::new(|tone: &mut Tone| {
-                let mut frame_l: [f32; 1024] = [0.0; 1024];
-                let mut frame_r: [f32; 1024] = [0.0; 1024];
+                let mut frame_l: Vec<f32> = vec![0.0; frame_size];
+                let mut frame_r: Vec<f32> = vec![0.0; frame_size];
 
                 tone.sine_wave_generator.ctrl(&ctrl_msg, tone.freq);
                 tone.sine_wave_generator

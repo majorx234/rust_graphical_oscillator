@@ -15,7 +15,7 @@ fn main() {
     };
     let adsr_envelope1: Adsr = Adsr::new(0.1, 0.2, 0.3, 0.3);
 
-    tone_handling.add_note_msg(trigger_msg1, adsr_envelope1);
+    tone_handling.add_note_msg(trigger_msg1, adsr_envelope1, 1024);
 
     let ctrl_msg = CtrlMsg {
         size: 96000,
@@ -53,7 +53,7 @@ fn main() {
     };
     let adsr_envelope2: Adsr = Adsr::new(0.1, 0.2, 0.3, 0.3);
 
-    tone_handling.add_note_msg(trigger_msg2, adsr_envelope2);
+    tone_handling.add_note_msg(trigger_msg2, adsr_envelope2, 1024);
 
     for _ in [0..10] {
         let mut out_l: [f32; 1024] = [0.0; 1024];

@@ -33,9 +33,9 @@ pub fn start_jack_thread(
             .unwrap();
 
         let mut frame_size = client.buffer_size() as usize;
-        if let Ok(_) = client.set_buffer_size(frame_size as u32) {
+        if client.set_buffer_size(frame_size as u32).is_ok() {
             // get frame size
-            let frame_size = client.buffer_size() as usize;
+            frame_size = client.buffer_size() as usize;
             println!(
                 "client started with samplerate: {} and frame_size: {}",
                 sample_rate, frame_size
@@ -85,7 +85,7 @@ pub fn start_jack_thread(
             };
 
             if let Ok(rx_trigger_msg) = rx_trigger.try_recv() {
-                tone_handling.add_note_msg(rx_trigger_msg, adsr_envelope.clone());
+                tone_handling.add_note_msg(rx_trigger_msg, adsr_envelope.clone(), frame_size);
             };
 
             tone_handling.process_tones(

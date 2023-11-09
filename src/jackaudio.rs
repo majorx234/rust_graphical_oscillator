@@ -13,12 +13,12 @@ pub struct SineWaveGenerator {
     pub freq_fm: f32,
     pub phase_fm: f32,
     pub offset: usize,
-    pub frame_size: u32,
+    pub frame_size: usize,
     pub fs: f32,
 }
 
 impl Wave for SineWaveGenerator {
-    fn new(frame_size: u32, sample_rate: f32) -> Self {
+    fn new(frame_size: usize, sample_rate: f32) -> Self {
         SineWaveGenerator {
             freq: 0.0,
             amplitude: 1.0,
@@ -29,7 +29,7 @@ impl Wave for SineWaveGenerator {
             freq_fm: 0.0,
             phase_fm: 0.0,
             offset: 0,
-            frame_size: frame_size,
+            frame_size,
             fs: sample_rate,
         }
     }
@@ -45,16 +45,16 @@ impl Wave for SineWaveGenerator {
             self.freq_fm as f64,
             self.phase_fm as f64,
             self.fs as f64,
-            self.frame_size as usize,
+            self.frame_size,
             self.offset,
         );
         let (_, values_data) = my_sine.gen_values();
 
-        for i in 0..self.frame_size as usize {
+        for i in 0..self.frame_size {
             output_l[i] = self.amplitude * values_data[i];
             output_r[i] = self.amplitude * values_data[i];
         }
-        self.offset += self.frame_size as usize;
+        self.offset += self.frame_size;
     }
 
     fn ctrl(&mut self, msg: &CtrlMsg, freq: f32) {
