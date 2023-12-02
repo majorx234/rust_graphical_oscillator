@@ -23,6 +23,8 @@ pub struct OscillatorGui {
     pub release: f32,
     pub num_samples: usize,
     pub length: usize,
+    pub jack_thread: Option<std::thread::JoinHandle<()>>,
+    pub midi_thread: Option<std::thread::JoinHandle<()>>,
     pub tx_close: Option<crossbeam_channel::Sender<bool>>,
     pub tx_ctrl: Option<std::sync::mpsc::Sender<CtrlMsg>>,
     pub tx_adsr: Option<std::sync::mpsc::Sender<Adsr>>,
@@ -49,6 +51,8 @@ impl Default for OscillatorGui {
             release: 0.2,
             num_samples: 48000,
             length: 96000,
+            jack_thread: None,
+            midi_thread: None,
             tx_close: None,
             tx_ctrl: None,
             tx_adsr: None,
@@ -61,7 +65,7 @@ impl Default for OscillatorGui {
 
 impl eframe::App for OscillatorGui {
     /// Called once before the first frame.
-    fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+    fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
         if self.init_repainter {
             // singleton pattern as setup()
             let ctx = ctx.clone();
@@ -214,7 +218,14 @@ impl eframe::App for OscillatorGui {
                     if ui.button("close").clicked() {
                         if let Some(x) = &self.tx_close {
                             x.send(false).unwrap();
-                            _frame.quit();
+                            /*
+                            if let Some(jack_thread) = &self.jack_thread {
+                                jack_thread.join().unwrap();
+                            }
+                            if let Some(ref midi_thread) = &self.midi_thread {
+                                midi_thread.join().unwrap();
+                            }*/
+                            frame.quit();
                         };
                     }
                 })

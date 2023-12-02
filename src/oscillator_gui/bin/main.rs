@@ -91,6 +91,8 @@ fn main() {
         release: 0.2,
         num_samples: 48000,
         length: 96000,
+        jack_thread: Some(jack_thread),
+        midi_thread: Some(midi_thread),
         tx_close: Some(tx_close),
         tx_ctrl: Some(tx_ctrl),
         tx_adsr: Some(tx_adsr),
@@ -106,7 +108,4 @@ fn main() {
         options,
         Box::new(|_cc| Box::new(graphical_osci_app)),
     );
-
-    midi_thread.join().unwrap();
-    jack_thread.join().unwrap();
 }
