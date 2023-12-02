@@ -218,13 +218,14 @@ impl eframe::App for OscillatorGui {
                     if ui.button("close").clicked() {
                         if let Some(x) = &self.tx_close {
                             x.send(false).unwrap();
-                            /*
-                            if let Some(jack_thread) = &self.jack_thread {
+
+                            if let Some(jack_thread) = self.jack_thread.take() {
                                 jack_thread.join().unwrap();
                             }
-                            if let Some(ref midi_thread) = &self.midi_thread {
+                            if let Some(midi_thread) = self.midi_thread.take() {
                                 midi_thread.join().unwrap();
-                            }*/
+                            }
+
                             frame.quit();
                         };
                     }
