@@ -197,7 +197,9 @@ impl eframe::App for OscillatorGui {
                                 velocity: self.velocity,
                                 length: self.length,
                             };
-                            x.send(trigger_note).unwrap();
+                            if let Err(e) = x.send(trigger_note) {
+                                println!("could send trigger_note e: {}",e);
+                            };
                         }
                     } else {
                         if trigger_button.drag_released() {
@@ -208,7 +210,9 @@ impl eframe::App for OscillatorGui {
                                     velocity: self.velocity,
                                     length: self.length,
                                 };
-                                x.send(trigger_note_off).unwrap();
+                                if let Err(e) = x.send(trigger_note_off) {
+                                    println!("could send trigger_note_off e: {}",e);
+                                };
                             }
                         }
                     }
@@ -217,7 +221,9 @@ impl eframe::App for OscillatorGui {
 
                     if ui.button("close").clicked() {
                         if let Some(x) = &self.tx_close {
-                            x.send(false).unwrap();
+                            if let Err(e) = x.send(false) {
+                                println!("could send close e: {}",e);
+                            };
 
                             if let Some(jack_thread) = self.jack_thread.take() {
                                 jack_thread.join().unwrap();
@@ -242,11 +248,12 @@ fn repainter(
     tx_note_velocity: Option<crossbeam_channel::Sender<TriggerNoteMsg>>,
 ) {
     if let Some(rx_note_velocity) = rx_note_velocity {
-        // let one_second = Duration::from_secs(1);
         loop {
             if let Ok(trigger_note_msg) = rx_note_velocity.recv() {
                 if let Some(ref tx_note_velocity) = tx_note_velocity {
-                    tx_note_velocity.send(trigger_note_msg);
+                    if let Err(e) = tx_note_velocity.send(trigger_note_msg){
+                        println!("could send trigger note in repainter e: {}",e);
+                    };
                 }
             }
             ctx.request_repaint();
