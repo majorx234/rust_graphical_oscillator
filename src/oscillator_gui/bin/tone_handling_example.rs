@@ -15,7 +15,7 @@ fn main() {
     };
     let adsr_envelope1: Adsr = Adsr::new(0.1, 0.2, 0.3, 0.3);
 
-    tone_handling.add_note_msg(trigger_msg1, adsr_envelope1, 1024);
+    tone_handling.add_note_msg(trigger_msg1, adsr_envelope1, frame_size);
 
     let ctrl_msg = CtrlMsg {
         size: 96000,
@@ -29,19 +29,19 @@ fn main() {
         volume: 1.0,
     };
 
-    let mut multiply_out_l: Vec<f32> = vec![1.0; 1024];
-    let mut multiply_out_r: Vec<f32> = vec![1.0; 1024];
+    let mut multiply_out_l: Vec<f32> = vec![1.0; frame_size];
+    let mut multiply_out_r: Vec<f32> = vec![1.0; frame_size];
 
     for _ in [0..10] {
-        let mut out_l: [f32; 1024] = [0.0; 1024];
-        let mut out_r: [f32; 1024] = [0.0; 1024];
+        let mut out_l: Vec<f32> = vec![0.0; frame_size];
+        let mut out_r: Vec<f32> = vec![0.0; frame_size];
         tone_handling.process_tones(
             &ctrl_msg,
             &mut out_l,
             &mut out_r,
             &mut multiply_out_l,
             &mut multiply_out_r,
-            1024,
+            frame_size,
         );
     }
 
@@ -53,18 +53,18 @@ fn main() {
     };
     let adsr_envelope2: Adsr = Adsr::new(0.1, 0.2, 0.3, 0.3);
 
-    tone_handling.add_note_msg(trigger_msg2, adsr_envelope2, 1024);
+    tone_handling.add_note_msg(trigger_msg2, adsr_envelope2, frame_size);
 
     for _ in [0..10] {
-        let mut out_l: [f32; 1024] = [0.0; 1024];
-        let mut out_r: [f32; 1024] = [0.0; 1024];
+        let mut out_l: Vec<f32> = vec![0.0; frame_size];
+        let mut out_r: Vec<f32> = vec![0.0; frame_size];
         tone_handling.process_tones(
             &ctrl_msg,
             &mut out_l,
             &mut out_r,
             &mut multiply_out_l,
             &mut multiply_out_r,
-            1024,
+            frame_size,
         );
     }
 }
