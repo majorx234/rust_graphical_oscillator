@@ -1,14 +1,12 @@
 use crossbeam_channel::unbounded;
 use eframe;
-use std::convert::TryFrom;
 use std::sync::mpsc;
-use wmidi;
 mod oscillator_gui;
 use oscillator_gui::OscillatorGui;
-use oscillator_lib::jackmidi::MidiMsg;
+use oscillator_lib::{jackmidi::MidiMsg, midi_process::midi_process_fct};
 mod jackprocess;
 use jackprocess::start_jack_thread;
-use oscillator_lib::trigger_note_msg::{NoteType, TriggerNoteMsg};
+use oscillator_lib::trigger_note_msg::TriggerNoteMsg;
 
 fn main() {
     let (tx_close, rx1_close) = unbounded();
@@ -27,52 +25,7 @@ fn main() {
     ) = mpsc::sync_channel(64);
 
     // midi msg test thread
-    // TODO: remove later
-    let midi_thread: std::thread::JoinHandle<()> = std::thread::spawn(move || {
-        while let Ok(m) = midi_receiver.recv() {
-            let bytes: &[u8] = &m.data;
-            if let Ok(message) = wmidi::MidiMessage::try_from(bytes) {
-                match message {
-                    wmidi::MidiMessage::NoteOn(_, note, val) => {
-                        let velocity = u8::from(val) as f32 / 127.0;
-                        let note_on_msg = TriggerNoteMsg {
-                            note_type: NoteType::NoteOn,
-                            freq: note.to_freq_f32(),
-                            velocity: velocity,
-                            length: 96000,
-                        };
-                        tx_note_velocity.send(note_on_msg.clone()).unwrap();
-                        tx_trigger2.send(note_on_msg).unwrap();
-
-                        println!("NoteOn {} at velocity {}", note, velocity);
-                    }
-                    wmidi::MidiMessage::NoteOff(_, note, val) => {
-                        let velocity = u8::from(val) as f32 / 127.0;
-                        let note_off_msg = TriggerNoteMsg {
-                            note_type: NoteType::NoteOff,
-                            freq: note.to_freq_f32(),
-                            velocity: velocity,
-                            length: 96000,
-                        };
-                        tx_note_velocity.send(note_off_msg.clone()).unwrap();
-                        tx_trigger2.send(note_off_msg).unwrap();
-
-                        println!("NoteOff {} at velocity {}", note, velocity);
-                    }
-                    message => println!("{:?}", message),
-                }
-            }
-
-            let mut run: bool = true;
-            if let Ok(running) = rx1_close.try_recv() {
-                run = running;
-            };
-            if !run {
-                break;
-            }
-        }
-        println!("exit midi thread\n");
-    });
+    let midi_thread = midi_process_fct(midi_receiver, tx_note_velocity, tx_trigger2, rx1_close);
 
     let jack_thread = start_jack_thread(rx2_close, rx_ctrl, rx_adsr, rx_trigger, midi_sender);
     let graphical_osci_app = OscillatorGui {
