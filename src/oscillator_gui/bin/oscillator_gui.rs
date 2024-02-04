@@ -198,7 +198,7 @@ impl eframe::App for OscillatorGui {
                                 length: self.length,
                             };
                             if let Err(e) = x.send(trigger_note) {
-                                println!("could send trigger_note e: {}",e);
+                                println!("could send trigger_note e: {}", e);
                             };
                         }
                     } else {
@@ -211,7 +211,7 @@ impl eframe::App for OscillatorGui {
                                     length: self.length,
                                 };
                                 if let Err(e) = x.send(trigger_note_off) {
-                                    println!("could send trigger_note_off e: {}",e);
+                                    println!("could send trigger_note_off e: {}", e);
                                 };
                             }
                         }
@@ -222,7 +222,7 @@ impl eframe::App for OscillatorGui {
                     if ui.button("close").clicked() {
                         if let Some(x) = &self.tx_close {
                             if let Err(e) = x.send(false) {
-                                println!("could send close e: {}",e);
+                                println!("could send close e: {}", e);
                             };
 
                             if let Some(jack_thread) = self.jack_thread.take() {
@@ -251,8 +251,8 @@ fn repainter(
         loop {
             if let Ok(trigger_note_msg) = rx_note_velocity.recv() {
                 if let Some(ref tx_note_velocity) = tx_note_velocity {
-                    if let Err(e) = tx_note_velocity.send(trigger_note_msg){
-                        println!("could send trigger note in repainter e: {}",e);
+                    if let Err(e) = tx_note_velocity.send(trigger_note_msg) {
+                        println!("could send trigger note in repainter e: {}", e);
                     };
                 }
             }

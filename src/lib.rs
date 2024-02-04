@@ -12,3 +12,4 @@ pub mod tone_map;
 pub mod trigger_note_msg;
 pub mod wave;
 pub mod wave_gen;
+pub mod util;

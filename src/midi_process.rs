@@ -1,5 +1,5 @@
 use crate::{
-    jackmidi::MidiMsg,
+    jackmidi::{MidiMsgBase, MidiMsgGeneric},
     trigger_note_msg::{NoteType, TriggerNoteMsg},
 };
 use std::convert::TryFrom;
@@ -7,14 +7,15 @@ use std::sync::mpsc;
 use wmidi;
 
 pub fn midi_process_fct(
-    midi_receiver: mpsc::Receiver<MidiMsg>,
+    midi_receiver: mpsc::Receiver<MidiMsgGeneric>,
     tx_note_velocity: crossbeam_channel::Sender<TriggerNoteMsg>,
     tx_trigger: mpsc::Sender<TriggerNoteMsg>,
     rx1_close: crossbeam_channel::Receiver<bool>,
 ) -> std::thread::JoinHandle<()> {
     std::thread::spawn(move || {
-        while let Ok(m) = midi_receiver.recv() {
-            let bytes: &[u8] = &m.data;
+        while let Ok(msg_generic) = midi_receiver.recv() {
+            let midi_sgs: Box<dyn MidiMsgBase> = msg_generic.into();
+            let bytes: &[u8] = &msg_generic.data;
             if let Ok(message) = wmidi::MidiMessage::try_from(bytes) {
                 match message {
                     wmidi::MidiMessage::NoteOn(_, note, val) => {

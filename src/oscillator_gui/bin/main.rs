@@ -3,7 +3,10 @@ use eframe;
 use std::sync::mpsc;
 mod oscillator_gui;
 use oscillator_gui::OscillatorGui;
-use oscillator_lib::{jackmidi::MidiMsg, midi_process::midi_process_fct};
+use oscillator_lib::{
+    jackmidi::{MidiMsg, MidiMsgGeneric},
+    midi_process::midi_process_fct,
+};
 mod jackprocess;
 use jackprocess::start_jack_thread;
 use oscillator_lib::trigger_note_msg::TriggerNoteMsg;
@@ -20,8 +23,8 @@ fn main() {
         crossbeam_channel::Receiver<TriggerNoteMsg>,
     ) = unbounded();
     let (midi_sender, midi_receiver): (
-        std::sync::mpsc::SyncSender<MidiMsg>,
-        std::sync::mpsc::Receiver<MidiMsg>,
+        std::sync::mpsc::SyncSender<MidiMsgGeneric>,
+        std::sync::mpsc::Receiver<MidiMsgGeneric>,
     ) = mpsc::sync_channel(64);
 
     // midi msg test thread

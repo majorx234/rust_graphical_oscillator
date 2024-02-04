@@ -1,10 +1,10 @@
 extern crate jack;
 extern crate wmidi;
-use oscillator_lib::adsr::Adsr;
 use oscillator_lib::ctrl_msg::CtrlMsg;
 use oscillator_lib::jackmidi::MidiMsg;
 use oscillator_lib::tone_handling::ToneHandling;
 use oscillator_lib::trigger_note_msg::TriggerNoteMsg;
+use oscillator_lib::{adsr::Adsr, jackmidi::MidiMsgGeneric};
 use std::{process::exit, thread, time::Duration};
 
 pub fn start_jack_thread(
@@ -12,7 +12,7 @@ pub fn start_jack_thread(
     rx_ctrl: std::sync::mpsc::Receiver<CtrlMsg>,
     rx_adsr: std::sync::mpsc::Receiver<Adsr>,
     rx_trigger: std::sync::mpsc::Receiver<TriggerNoteMsg>,
-    midi_sender: std::sync::mpsc::SyncSender<MidiMsg>,
+    midi_sender: std::sync::mpsc::SyncSender<MidiMsgGeneric>,
 ) -> std::thread::JoinHandle<()> {
     std::thread::spawn(move || {
         let mut run: bool = true;
@@ -33,6 +33,16 @@ pub fn start_jack_thread(
             .unwrap();
 
         let mut frame_size = client.buffer_size() as usize;
+        if let Ok(_) = client.set_buffer_size(frame_size as u32) {
+            // get frame size
+            let frame_size = client.buffer_size() as usize;
+            println!(
+                "client started with samplerate: {} and frame_size: {}",
+                sample_rate, frame_size
+            );
+        } else {
+            exit(-1);
+        }
         if client.set_buffer_size(frame_size as u32).is_ok() {
             // get frame size
             frame_size = client.buffer_size() as usize;
@@ -56,14 +66,13 @@ pub fn start_jack_thread(
             num_samples: frame_size,
             volume: 1.0,
         };
-        let sound_length = 96000; // value of length of a synth sample
-                                  //TODO:  paramter in gui or depending of midi touched key
+
         let mut adsr_envelope = Adsr::new(0.1, 0.2, 0.5, 0.2);
 
         let process_callback = move |_: &jack::Client, ps: &jack::ProcessScope| -> jack::Control {
             let show_p = midi_in.iter(ps);
             for e in show_p {
-                let c: MidiMsg = e.into();
+                let c: MidiMsgGeneric = e.into();
                 let _ = midi_sender.try_send(c);
             }
             let out_a_p = out_a.as_mut_slice(ps);

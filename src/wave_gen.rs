@@ -65,10 +65,10 @@ impl SineWave {
         let values: Vec<f32> = (self.offset..(self.offset + self.num_samples))
             .map(|i| {
                 (self.amplitude
-                * ((amp(i as f64, self.freq_am, self.fs) + (1.0 - self.intensity_am))
-                    * ((2.0 * f64::consts::PI * (self.freq_base / self.fs) * (i as f64)
-                        + modulator_index * shift(i as f64, self.freq_fm, self.fs))
-                    .sin()))) as f32
+                    * ((amp(i as f64, self.freq_am, self.fs) + (1.0 - self.intensity_am))
+                        * ((2.0 * f64::consts::PI * (self.freq_base / self.fs) * (i as f64)
+                            + modulator_index * shift(i as f64, self.freq_fm, self.fs))
+                        .sin()))) as f32
             })
             .collect();
         return (self.num_samples, values);

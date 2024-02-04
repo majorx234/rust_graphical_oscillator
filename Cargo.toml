@@ -2,7 +2,7 @@
 name = "rust_graphical_oscillator"
 version = "0.1.1"
 authors = ["MajorX234 <majorx234@googlemail.com>"]
-edition = "2018"
+edition = "2021"
 
 [lib]
 name = "oscillator_lib"
@@ -24,5 +24,7 @@ path = "src/oscillator_gui/bin/tone_handling_example.rs"
 eframe = { version = "0.18.0"}
 scan_fmt = "0.2.6"
 jack = "0.10.0"
+serde = { version = "1.0.193" }
+serde_json = { version = "1.0.108"}
 wmidi = "4.0.0"
 crossbeam-channel = "0.5.6"
