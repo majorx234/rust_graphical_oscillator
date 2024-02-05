@@ -3,6 +3,182 @@ use serde::{Deserialize, Serialize};
 use std::convert::From;
 
 const MAX_MIDI: usize = 3;
+type MidiId = u16;
+type Note = u8;
+type Intensity = u8;
+
+#[derive(Eq, Hash, PartialEq, Serialize, Deserialize, Clone)]
+pub enum MidiMsgAdvanced {
+    MidiEmpty,
+    MidiNoteOnOff(MidiId, MidiId, bool, Note, Intensity),
+    MidiControlIdValue(MidiId, u16),
+    MidiControl2IdsValue(MidiId, MidiId, u16),
+}
+
+impl MidiMsgAdvanced {
+    pub fn get_id(&self) -> u16 {
+        match self {
+            Self::MidiEmpty => 0,
+            Self::MidiNoteOnOff(id0, _, _, _, _) => *id0,
+            Self::MidiControlIdValue(id, _) => *id,
+            Self::MidiControl2IdsValue(id0, _, _) => *id0,
+        }
+    }
+}
+
+impl MidiMsgAdvanced {
+    pub fn from_midi_msg_cc(midi_msg: MidiMsgControlChange) -> Self {
+        let midi_id = midi_msg.get_id();
+        let midi_value = 128 * midi_msg.get_value();
+        MidiMsgAdvanced::MidiControlIdValue(midi_id, midi_value)
+    }
+
+    pub fn from_midi_msg_cc2ids(
+        midi_msg0: MidiMsgControlChange,
+        midi_msg1: MidiMsgControlChange,
+    ) -> Self {
+        let midi_id0 = midi_msg0.get_id();
+        let midi_id1 = midi_msg1.get_id();
+
+        let midi_value = 128 * midi_msg0.get_value() + midi_msg1.get_value();
+
+        MidiMsgAdvanced::MidiControl2IdsValue(midi_id0, midi_id1, midi_value)
+    }
+
+    pub fn from_midi_msgs_note_on(midi_msg: MidiMsgNoteOn) -> Self {
+        let midi_id_on = midi_msg.get_id();
+        let midi_value = true;
+        let midi_id_off = midi_id_on - 0x1000;
+        let midi_note = midi_msg.get_data()[1];
+        let midi_intensity = midi_msg.get_data()[2];
+
+        MidiMsgAdvanced::MidiNoteOnOff(
+            midi_id_on,
+            midi_id_off,
+            midi_value,
+            midi_note,
+            midi_intensity,
+        )
+    }
+
+    pub fn from_midi_msgs_note_off(midi_msg: MidiMsgNoteOff) -> Self {
+        let midi_id_on = midi_msg.get_id() + 0x1000;
+        let midi_value = false;
+        let midi_id_off = midi_msg.get_id();
+        let midi_note = midi_msg.get_data()[1];
+        let midi_intensity = midi_msg.get_data()[2];
+
+        MidiMsgAdvanced::MidiNoteOnOff(
+            midi_id_on,
+            midi_id_off,
+            midi_value,
+            midi_note,
+            midi_intensity,
+        )
+    }
+
+    pub fn from_current_and_last_opt_midi_msgs(
+        (current_midi_msg, last_opt_midi_msg): (
+            Box<dyn MidiMsgBase>,
+            &mut Option<Box<dyn MidiMsgBase>>,
+        ),
+    ) -> Option<Self> {
+        let mut id = current_midi_msg.get_id();
+        let last_last_midi_msg = last_opt_midi_msg.take();
+        let midi_msg_value = current_midi_msg.get_value();
+        let midi_msgs_data = current_midi_msg.get_data();
+        let midi_msg_type = current_midi_msg.type_of().to_string();
+        let midi_msg_timestamp = current_midi_msg.get_time();
+        let mut id_value_time_diff_to_last_msg = None;
+        if let Some(last_last_midi_msg) = last_last_midi_msg {
+            let time_diff = midi_msg_timestamp.abs_diff(last_last_midi_msg.get_time());
+            let last_id = last_last_midi_msg.get_id();
+            let last_value = last_last_midi_msg.get_value();
+            if time_diff < 10 && id > last_id {
+                id_value_time_diff_to_last_msg = Some((last_id, last_value, time_diff));
+            }
+        }
+        *last_opt_midi_msg = Some(current_midi_msg);
+        match midi_msg_type.as_str() {
+            "MidiMsgControlChange" => {
+                if let Some((last_id, last_value, _time_diff)) = id_value_time_diff_to_last_msg {
+                    Some(MidiMsgAdvanced::MidiControl2IdsValue(
+                        last_id,
+                        id,
+                        midi_msg_value + last_value * 128,
+                    ))
+                } else {
+                    Some(MidiMsgAdvanced::MidiControlIdValue(id, midi_msg_value))
+                }
+            }
+            "MidiMsgNoteOn" => Some(MidiMsgAdvanced::MidiNoteOnOff(
+                id,
+                id - 0x1000,
+                true,
+                midi_msgs_data[1],
+                midi_msgs_data[2],
+            )),
+            "MidiMsgNoteOff" => {
+                id += 0x1000;
+                Some(MidiMsgAdvanced::MidiNoteOnOff(
+                    id,
+                    id - 0x1000,
+                    false,
+                    midi_msgs_data[1],
+                    midi_msgs_data[2],
+                ))
+            }
+            "MidiMsgPitchBend" => Some(MidiMsgAdvanced::MidiControl2IdsValue(
+                id,
+                id,
+                midi_msg_value,
+            )),
+            _ => None,
+        }
+    }
+}
+
+impl std::fmt::Display for MidiMsgAdvanced {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::MidiEmpty => write!(f, "MidiEmpty"),
+            Self::MidiNoteOnOff(id0, id1, value, note, intensity) => {
+                write!(
+                    f,
+                    "NoteOnOff({}, {}, {}, {}, {})",
+                    id0, id1, *value, note, intensity
+                )
+            }
+            Self::MidiControlIdValue(id, value) => {
+                write!(f, "MidiControlIdValue({}, {})", id, value)
+            }
+            Self::MidiControl2IdsValue(id0, id1, value) => {
+                write!(f, "MidiControl2IdsValue({}, {}, {})", id0, id1, value)
+            }
+        }
+    }
+}
+
+impl std::fmt::Debug for MidiMsgAdvanced {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::MidiEmpty => write!(f, "MidiEmpty"),
+            Self::MidiNoteOnOff(id0, id1, value, note, intensity) => {
+                write!(
+                    f,
+                    "NoteOnOff({}, {}, {}, {}, {})",
+                    id0, id1, *value, note, intensity
+                )
+            }
+            Self::MidiControlIdValue(id, value) => {
+                write!(f, "MidiControlIdValue({}, {})", id, value)
+            }
+            Self::MidiControl2IdsValue(id0, id1, value) => {
+                write!(f, "MidiControl2IdsValue({}, {}, {})", id0, id1, value)
+            }
+        }
+    }
+}
 
 //a fixed size container to copy data out of real-time thread
 #[derive(Copy, Clone)]
