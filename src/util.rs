@@ -53,3 +53,9 @@ pub fn from_status_byte(sb: u8) -> (u8, u8) {
     let channel = sb & 0b00001111;
     (status, channel)
 }
+
+#[inline(always)]
+pub fn to_freq_f32(value: u8) -> f32 {
+    let exp = (f32::from(value) + 36.376_316) / 12.0;
+    2f32.powf(exp)
+}
