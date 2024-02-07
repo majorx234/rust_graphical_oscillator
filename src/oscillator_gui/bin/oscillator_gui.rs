@@ -1,4 +1,4 @@
-use crossbeam_channel::unbounded;
+use crossbeam_channel::{unbounded, Receiver};
 use eframe::egui;
 use eframe::egui::plot::{Line, Plot, Value, Values};
 use oscillator_lib::adsr::Adsr;
@@ -31,6 +31,7 @@ pub struct OscillatorGui {
     pub tx_trigger: Option<std::sync::mpsc::Sender<TriggerNoteMsg>>,
     pub rx_note_velocity: Option<crossbeam_channel::Receiver<TriggerNoteMsg>>,
     pub init_repainter: bool,
+    pub rx_midi_ctrl: Option<crossbeam_channel::Receiver<(String, f32)>>,
 }
 
 impl Default for OscillatorGui {
@@ -59,6 +60,7 @@ impl Default for OscillatorGui {
             tx_trigger: None,
             rx_note_velocity: None,
             init_repainter: true,
+            rx_midi_ctrl: None,
         }
     }
 }
@@ -77,6 +79,22 @@ impl eframe::App for OscillatorGui {
                 self.rx_note_velocity = Some(rx_note_velocity);
             }
             self.init_repainter = false;
+        }
+        if let Some(ref rx_midi_ctrl) = self.rx_midi_ctrl {
+            let mut received_midi_ctrl_messages: Vec<(String, f32)> = Vec::new();
+            while let Ok(midi_ctrl_msgs) = rx_midi_ctrl.try_recv() {
+                received_midi_ctrl_messages.push(midi_ctrl_msgs);
+            }
+            for (function, value) in received_midi_ctrl_messages {
+                /* functions to check
+                intensity_am
+                freq_am,
+                phase_am
+                intensity_fm
+                freq_fm
+                phase_fm
+                */
+            }
         }
         let my_sine = SineWave::new(
             self.freq as f64,

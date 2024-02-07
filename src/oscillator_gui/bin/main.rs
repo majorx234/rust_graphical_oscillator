@@ -55,6 +55,7 @@ fn main() {
         tx_trigger: Some(tx_trigger),
         rx_note_velocity: Some(rx_note_velocity),
         init_repainter: true,
+        rx_midi_ctrl: None,
     };
     let mut options = eframe::NativeOptions::default();
     let window_size: eframe::egui::Vec2 = eframe::egui::Vec2::new(800.0, 600.0);
