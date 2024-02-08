@@ -1,0 +1,10 @@
+{
+    "midi_functions":[
+        {"name": "intensity_am"},
+        {"name": "freq_am"},
+        {"name": "phase_am"},
+        {"name": "intensity_fm"},
+        {"name": "freq_fm"},
+        {"name": "phase_fm"}
+  ]
+}
