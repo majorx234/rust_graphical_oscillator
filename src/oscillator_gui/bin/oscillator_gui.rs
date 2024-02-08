@@ -5,6 +5,7 @@ use oscillator_lib::adsr::Adsr;
 use oscillator_lib::ctrl_msg::CtrlMsg;
 use oscillator_lib::trigger_note_msg::{NoteType, TriggerNoteMsg};
 use oscillator_lib::wave_gen::SineWave;
+use std::f32::consts::PI;
 use std::thread;
 
 pub struct OscillatorGui {
@@ -86,14 +87,15 @@ impl eframe::App for OscillatorGui {
                 received_midi_ctrl_messages.push(midi_ctrl_msgs);
             }
             for (function, value) in received_midi_ctrl_messages {
-                /* functions to check
-                intensity_am
-                freq_am,
-                phase_am
-                intensity_fm
-                freq_fm
-                phase_fm
-                */
+                match function.as_str() {
+                    "intensity_am" => self.intensity_am = value,
+                    "freq_am" => self.freq_am = value * 10.0,
+                    "phase_am" => self.phase_am = value * 2.0 * PI,
+                    "intensity_fm" => self.intensity_fm = value * 100.0,
+                    "freq_fm" => self.freq_fm = value * 10.0,
+                    "phase_fm" => self.phase_fm = value * 2.0 * PI,
+                    &_ => (),
+                }
             }
         }
         let my_sine = SineWave::new(
