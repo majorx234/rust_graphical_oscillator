@@ -114,7 +114,6 @@ impl eframe::App for OscillatorGui {
         let mut _velocity: f32 = 0.0;
         if let Some(rx_note_velocity) = &self.rx_note_velocity {
             if let Ok(trigger_note_msg) = rx_note_velocity.try_recv() {
-                println!("crossbeam recved");
                 self.freq = trigger_note_msg.freq;
                 _velocity = trigger_note_msg.velocity;
             };

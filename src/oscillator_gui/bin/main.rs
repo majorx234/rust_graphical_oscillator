@@ -1,17 +1,55 @@
 use crossbeam_channel::unbounded;
 use eframe;
-use std::sync::mpsc;
+use std::{collections::HashMap, sync::mpsc};
 mod oscillator_gui;
 use oscillator_gui::OscillatorGui;
 use oscillator_lib::{
-    jackmidi::{MidiMsg, MidiMsgGeneric},
+    jackmidi::{MidiMsg, MidiMsgAdvanced, MidiMsgGeneric},
+    midi_functions::parse_json_file_to_midi_functions_with_midi_msgs_advanced,
     midi_process::midi_process_fct,
 };
 mod jackprocess;
+use clap::Parser;
 use jackprocess::start_jack_thread;
 use oscillator_lib::trigger_note_msg::TriggerNoteMsg;
 
+#[derive(Parser, Debug)]
+#[command(author, version, about, long_about = None)]
+struct Args {
+    /// midi_mapping_filepath
+    #[arg(short, long, value_name = "filepath")]
+    pub midi_mapping_filepath: Option<String>,
+}
+
 fn main() {
+    let midi_functions_with_midi_advanced_msgs: Result<
+        HashMap<String, Vec<MidiMsgAdvanced>>,
+        String,
+    > = Args::parse().midi_mapping_filepath.map_or_else(
+        || Ok(HashMap::<String, Vec<MidiMsgAdvanced>>::new()),
+        |filepath| {
+            // Todo: parse filepath
+            parse_json_file_to_midi_functions_with_midi_msgs_advanced(&filepath)
+        },
+    );
+    // creat a reverse Hashmap
+    let mut midi_advanced_msgs2midi_functions: HashMap<MidiMsgAdvanced, Vec<String>> =
+        HashMap::new();
+    if let Ok(midi_functions_with_midi_advanced_msgs) = midi_functions_with_midi_advanced_msgs {
+        for (key, value_vec) in midi_functions_with_midi_advanced_msgs {
+            let key_insert = key.clone();
+            for value in value_vec {
+                if let Some(ref mut midi_function_vec) =
+                    midi_advanced_msgs2midi_functions.get_mut(&value)
+                {
+                    midi_function_vec.push(key_insert.clone());
+                } else {
+                    midi_advanced_msgs2midi_functions.insert(value, vec![key_insert.clone()]);
+                }
+            }
+        }
+    }
+
     let (tx_close, rx1_close) = unbounded();
     let rx2_close = rx1_close.clone();
     let (tx_ctrl, rx_ctrl) = mpsc::channel();
@@ -28,7 +66,14 @@ fn main() {
     ) = mpsc::sync_channel(64);
 
     // midi msg test thread
-    let midi_thread = midi_process_fct(midi_receiver, tx_note_velocity, tx_trigger2, rx1_close);
+    let midi_thread = midi_process_fct(
+        midi_receiver,
+        tx_note_velocity,
+        tx_trigger2,
+        rx1_close,
+        None,
+        Some(midi_advanced_msgs2midi_functions),
+    );
 
     let jack_thread = start_jack_thread(rx2_close, rx_ctrl, rx_adsr, rx_trigger, midi_sender);
     let graphical_osci_app = OscillatorGui {

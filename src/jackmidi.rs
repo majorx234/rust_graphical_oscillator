@@ -24,6 +24,24 @@ impl MidiMsgAdvanced {
             Self::MidiControl2IdsValue(id0, _, _) => *id0,
         }
     }
+
+    pub fn get_value(&self) -> u16 {
+        match self {
+            Self::MidiEmpty => 0,
+            Self::MidiNoteOnOff(_, _, _, _, value) => *value as u16,
+            Self::MidiControlIdValue(_, value) => *value,
+            Self::MidiControl2IdsValue(_, _, value) => *value,
+        }
+    }
+
+    pub fn get_norm_value(&self) -> f32 {
+        match self {
+            Self::MidiEmpty => 0.0,
+            Self::MidiNoteOnOff(_, _, _, _, value) => *value as f32 / 127.0,
+            Self::MidiControlIdValue(_, value) => *value as f32 / 127.0,
+            Self::MidiControl2IdsValue(_, _, value) => *value as f32 / 16383.0,
+        }
+    }
 }
 
 impl MidiMsgAdvanced {

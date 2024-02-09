@@ -3,8 +3,8 @@ use crate::{
     trigger_note_msg::{NoteType, TriggerNoteMsg},
     util::*,
 };
-use std::convert::TryFrom;
 use std::sync::mpsc;
+use std::{collections::HashMap, convert::TryFrom};
 use wmidi;
 
 pub fn midi_process_fct(
@@ -12,6 +12,8 @@ pub fn midi_process_fct(
     tx_note_velocity: crossbeam_channel::Sender<TriggerNoteMsg>,
     tx_trigger: mpsc::Sender<TriggerNoteMsg>,
     rx1_close: crossbeam_channel::Receiver<bool>,
+    tx_midi_ctrl: Option<crossbeam_channel::Sender<(String, f32)>>,
+    midi_advanced_msgs2midi_functions: Option<HashMap<MidiMsgAdvanced, Vec<String>>>,
 ) -> std::thread::JoinHandle<()> {
     std::thread::spawn(move || {
         let mut last_midi_msg: Option<Box<dyn MidiMsgBase>> = None;
@@ -57,7 +59,22 @@ pub fn midi_process_fct(
                             tx_trigger.send(note_off_msg).unwrap();
                         }
                     }
-                    _ => (),
+                    other_midi_advanced_msg => {
+                        if let Some(ref tx_midi_ctrl) = tx_midi_ctrl {
+                            if let Some(ref midi_advanced_msgs2midi_functions) =
+                                midi_advanced_msgs2midi_functions
+                            {
+                                let value = other_midi_advanced_msg.get_norm_value();
+                                if let Some(functions) =
+                                    midi_advanced_msgs2midi_functions.get(&other_midi_advanced_msg)
+                                {
+                                    for function in functions {
+                                        tx_midi_ctrl.try_send((function.to_string(), value));
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
             let mut run: bool = true;
