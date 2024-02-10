@@ -42,6 +42,19 @@ impl MidiMsgAdvanced {
             Self::MidiControl2IdsValue(_, _, value) => *value as f32 / 16383.0,
         }
     }
+
+    pub fn reset_value(&mut self) {
+        match self {
+            Self::MidiEmpty => *self = Self::MidiEmpty,
+            Self::MidiNoteOnOff(id0, id1, pressed, note, _) => {
+                *self = Self::MidiNoteOnOff(*id0, *id1, *pressed, *note, 0)
+            }
+            Self::MidiControlIdValue(id, _) => *self = Self::MidiControlIdValue(*id, 0),
+            Self::MidiControl2IdsValue(id0, id1, _) => {
+                *self = Self::MidiControl2IdsValue(*id0, *id1, 0)
+            }
+        }
+    }
 }
 
 impl MidiMsgAdvanced {

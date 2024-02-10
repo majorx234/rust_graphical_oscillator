@@ -5,7 +5,6 @@ use crate::{
 };
 use std::sync::mpsc;
 use std::{collections::HashMap, convert::TryFrom};
-use wmidi;
 
 pub fn midi_process_fct(
     midi_receiver: mpsc::Receiver<MidiMsgGeneric>,
@@ -53,17 +52,19 @@ pub fn midi_process_fct(
                                 tx_trigger.send(note_off_msg).unwrap();
                             }
                         }
-                        other_midi_advanced_msg => {
+                        mut other_midi_advanced_msg => {
                             if let Some(ref tx_midi_ctrl) = tx_midi_ctrl {
                                 if let Some(ref midi_advanced_msgs2midi_functions) =
                                     midi_advanced_msgs2midi_functions
                                 {
                                     let value = other_midi_advanced_msg.get_norm_value();
+                                    other_midi_advanced_msg.reset_value();
                                     if let Some(functions) = midi_advanced_msgs2midi_functions
                                         .get(&other_midi_advanced_msg)
                                     {
                                         for function in functions {
-                                            tx_midi_ctrl.try_send((function.to_string(), value));
+                                            let _ = tx_midi_ctrl
+                                                .try_send((function.to_string(), value));
                                         }
                                     }
                                 }
