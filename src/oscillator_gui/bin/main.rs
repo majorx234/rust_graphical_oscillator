@@ -29,10 +29,11 @@ fn main() {
         || Ok(HashMap::<String, Vec<MidiMsgAdvanced>>::new()),
         |filepath| {
             // Todo: parse filepath
+            println!("found midi config file: {}", filepath.as_str());
             parse_json_file_to_midi_functions_with_midi_msgs_advanced(&filepath)
         },
     );
-    // creat a reverse Hashmap
+    // create a reverse Hashmap
     let mut midi_advanced_msgs2midi_functions: HashMap<MidiMsgAdvanced, Vec<String>> =
         HashMap::new();
     if let Ok(midi_functions_with_midi_advanced_msgs) = midi_functions_with_midi_advanced_msgs {
@@ -49,7 +50,6 @@ fn main() {
             }
         }
     }
-
     let (tx_close, rx1_close) = unbounded();
     let rx2_close = rx1_close.clone();
     let (tx_ctrl, rx_ctrl) = mpsc::channel();

@@ -20,8 +20,6 @@ pub fn midi_process_fct(
         let mut run_loop = true;
 
         while run_loop {
-            let mut received_midi_advanced_messages: Vec<MidiMsgAdvanced> = Vec::new();
-
             while let Ok(msg_generic) = midi_receiver.recv() {
                 let midi_msg: Box<dyn MidiMsgBase> = msg_generic.into();
 
@@ -31,45 +29,42 @@ pub fn midi_process_fct(
                 ));
                 if let Some(midi_advanced_msg) = midi_advanced_msg {
                     let _id = midi_advanced_msg.get_id();
-                    received_midi_advanced_messages.push(midi_advanced_msg);
-                }
-            }
-            for midi_advanced_msg in received_midi_advanced_messages {
-                match midi_advanced_msg {
-                    MidiMsgAdvanced::MidiNoteOnOff(id0, id1, bvalue, note, intensity) => {
-                        if bvalue == true {
-                            let velocity = intensity as f32 / 127.0;
-                            let note_on_msg = TriggerNoteMsg {
-                                note_type: NoteType::NoteOn,
-                                freq: to_freq_f32(note),
-                                velocity,
-                                length: 96000,
-                            };
-                            tx_note_velocity.send(note_on_msg).unwrap();
-                            tx_trigger.send(note_on_msg).unwrap();
-                        } else {
-                            let velocity = intensity as f32 / 127.0;
-                            let note_off_msg = TriggerNoteMsg {
-                                note_type: NoteType::NoteOff,
-                                freq: to_freq_f32(note),
-                                velocity,
-                                length: 96000,
-                            };
-                            tx_note_velocity.send(note_off_msg.clone()).unwrap();
-                            tx_trigger.send(note_off_msg).unwrap();
+                    match midi_advanced_msg {
+                        MidiMsgAdvanced::MidiNoteOnOff(id0, id1, bvalue, note, intensity) => {
+                            if bvalue == true {
+                                let velocity = intensity as f32 / 127.0;
+                                let note_on_msg = TriggerNoteMsg {
+                                    note_type: NoteType::NoteOn,
+                                    freq: to_freq_f32(note),
+                                    velocity,
+                                    length: 96000,
+                                };
+                                tx_note_velocity.send(note_on_msg).unwrap();
+                                tx_trigger.send(note_on_msg).unwrap();
+                            } else {
+                                let velocity = intensity as f32 / 127.0;
+                                let note_off_msg = TriggerNoteMsg {
+                                    note_type: NoteType::NoteOff,
+                                    freq: to_freq_f32(note),
+                                    velocity,
+                                    length: 96000,
+                                };
+                                tx_note_velocity.send(note_off_msg.clone()).unwrap();
+                                tx_trigger.send(note_off_msg).unwrap();
+                            }
                         }
-                    }
-                    other_midi_advanced_msg => {
-                        if let Some(ref tx_midi_ctrl) = tx_midi_ctrl {
-                            if let Some(ref midi_advanced_msgs2midi_functions) =
-                                midi_advanced_msgs2midi_functions
-                            {
-                                let value = other_midi_advanced_msg.get_norm_value();
-                                if let Some(functions) =
-                                    midi_advanced_msgs2midi_functions.get(&other_midi_advanced_msg)
+                        other_midi_advanced_msg => {
+                            if let Some(ref tx_midi_ctrl) = tx_midi_ctrl {
+                                if let Some(ref midi_advanced_msgs2midi_functions) =
+                                    midi_advanced_msgs2midi_functions
                                 {
-                                    for function in functions {
-                                        tx_midi_ctrl.try_send((function.to_string(), value));
+                                    let value = other_midi_advanced_msg.get_norm_value();
+                                    if let Some(functions) = midi_advanced_msgs2midi_functions
+                                        .get(&other_midi_advanced_msg)
+                                    {
+                                        for function in functions {
+                                            tx_midi_ctrl.try_send((function.to_string(), value));
+                                        }
                                     }
                                 }
                             }
