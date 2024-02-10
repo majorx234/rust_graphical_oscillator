@@ -31,8 +31,9 @@ pub struct OscillatorGui {
     pub tx_adsr: Option<std::sync::mpsc::Sender<Adsr>>,
     pub tx_trigger: Option<std::sync::mpsc::Sender<TriggerNoteMsg>>,
     pub rx_note_velocity: Option<crossbeam_channel::Receiver<TriggerNoteMsg>>,
-    pub init_repainter: bool,
     pub rx_midi_ctrl: Option<crossbeam_channel::Receiver<(String, f32)>>,
+    pub init_repainter_note_velocity: bool,
+    pub init_repainter_midi_ctrl: bool,
 }
 
 impl Default for OscillatorGui {
@@ -60,8 +61,9 @@ impl Default for OscillatorGui {
             tx_adsr: None,
             tx_trigger: None,
             rx_note_velocity: None,
-            init_repainter: true,
             rx_midi_ctrl: None,
+            init_repainter_note_velocity: true,
+            init_repainter_midi_ctrl: true,
         }
     }
 }
@@ -69,7 +71,7 @@ impl Default for OscillatorGui {
 impl eframe::App for OscillatorGui {
     /// Called once before the first frame.
     fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
-        if self.init_repainter {
+        if self.init_repainter_note_velocity {
             // singleton pattern as setup()
             let ctx = ctx.clone();
             if let Some(rx_note_velocity) = &self.rx_note_velocity {
@@ -79,7 +81,17 @@ impl eframe::App for OscillatorGui {
                 thread::spawn(|| repainter(ctx, Some(rx_note_velocity2), Some(tx_note_velocity)));
                 self.rx_note_velocity = Some(rx_note_velocity);
             }
-            self.init_repainter = false;
+            self.init_repainter_note_velocity = false;
+        }
+        if self.init_repainter_midi_ctrl {
+            let ctx = ctx.clone();
+            if let Some(ref rx_midi_ctrl) = self.rx_midi_ctrl {
+                let rx_midi_ctrl2 = rx_midi_ctrl.clone();
+                let (tx_midi_ctrl, rx_midi_ctrl) = unbounded();
+                thread::spawn(|| repainter_midi_ctrl(ctx, Some(rx_midi_ctrl2), Some(tx_midi_ctrl)));
+                self.rx_midi_ctrl = Some(rx_midi_ctrl);
+            }
+            self.init_repainter_midi_ctrl = false;
         }
         if let Some(ref rx_midi_ctrl) = self.rx_midi_ctrl {
             let mut received_midi_ctrl_messages: Vec<(String, f32)> = Vec::new();
@@ -271,6 +283,25 @@ fn repainter(
             if let Ok(trigger_note_msg) = rx_note_velocity.recv() {
                 if let Some(ref tx_note_velocity) = tx_note_velocity {
                     if let Err(e) = tx_note_velocity.send(trigger_note_msg) {
+                        println!("could send trigger note in repainter e: {}", e);
+                    };
+                }
+            }
+            ctx.request_repaint();
+        }
+    }
+}
+
+fn repainter_midi_ctrl(
+    ctx: egui::Context,
+    rx_midi_ctrl: Option<crossbeam_channel::Receiver<(String, f32)>>,
+    tx_midi_ctrl: Option<crossbeam_channel::Sender<(String, f32)>>,
+) {
+    if let Some(rx_midi_ctrl) = rx_midi_ctrl {
+        loop {
+            if let Ok(midi_ctrl_msg) = rx_midi_ctrl.recv() {
+                if let Some(ref tx_midi_ctrl) = tx_midi_ctrl {
+                    if let Err(e) = tx_midi_ctrl.send(midi_ctrl_msg) {
                         println!("could send trigger note in repainter e: {}", e);
                     };
                 }
