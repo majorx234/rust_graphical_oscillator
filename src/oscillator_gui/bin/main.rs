@@ -64,14 +64,17 @@ fn main() {
         std::sync::mpsc::SyncSender<MidiMsgGeneric>,
         std::sync::mpsc::Receiver<MidiMsgGeneric>,
     ) = mpsc::sync_channel(64);
-
+    let (tx_midi_ctrl, rx_midi_ctrl): (
+        crossbeam_channel::Sender<(String, f32)>,
+        crossbeam_channel::Receiver<(String, f32)>,
+    ) = unbounded();
     // midi msg test thread
     let midi_thread = midi_process_fct(
         midi_receiver,
         tx_note_velocity,
         tx_trigger2,
         rx1_close,
-        None,
+        Some(tx_midi_ctrl),
         Some(midi_advanced_msgs2midi_functions),
     );
 
@@ -100,7 +103,7 @@ fn main() {
         tx_trigger: Some(tx_trigger),
         rx_note_velocity: Some(rx_note_velocity),
         init_repainter: true,
-        rx_midi_ctrl: None,
+        rx_midi_ctrl: Some(rx_midi_ctrl),
     };
     let mut options = eframe::NativeOptions::default();
     let window_size: eframe::egui::Vec2 = eframe::egui::Vec2::new(800.0, 600.0);
