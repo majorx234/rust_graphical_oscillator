@@ -1,10 +1,9 @@
 extern crate jack;
 extern crate wmidi;
-use oscillator_lib::ctrl_msg::CtrlMsg;
-use oscillator_lib::jackmidi::MidiMsg;
-use oscillator_lib::tone_handling::ToneHandling;
-use oscillator_lib::trigger_note_msg::TriggerNoteMsg;
-use oscillator_lib::{adsr::Adsr, jackmidi::MidiMsgGeneric};
+use oscillator_lib::{
+    adsr::Adsr, ctrl_msg::CtrlMsg, jackmidi::MidiMsgGeneric, tone_handling::ToneHandling,
+    trigger_note_msg::TriggerNoteMsg,
+};
 use std::{process::exit, thread, time::Duration};
 
 pub fn start_jack_thread(

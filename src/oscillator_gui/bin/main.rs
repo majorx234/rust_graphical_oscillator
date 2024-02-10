@@ -4,7 +4,7 @@ use std::{collections::HashMap, sync::mpsc};
 mod oscillator_gui;
 use oscillator_gui::OscillatorGui;
 use oscillator_lib::{
-    jackmidi::{MidiMsg, MidiMsgAdvanced, MidiMsgGeneric},
+    jackmidi::{MidiMsgAdvanced, MidiMsgGeneric},
     midi_functions::parse_json_file_to_midi_functions_with_midi_msgs_advanced,
     midi_process::midi_process_fct,
 };

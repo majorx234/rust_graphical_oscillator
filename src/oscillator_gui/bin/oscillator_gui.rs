@@ -1,4 +1,4 @@
-use crossbeam_channel::{unbounded, Receiver};
+use crossbeam_channel::unbounded;
 use eframe::egui;
 use eframe::egui::plot::{Line, Plot, Value, Values};
 use oscillator_lib::adsr::Adsr;

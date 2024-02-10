@@ -3,8 +3,8 @@ use crate::{
     trigger_note_msg::{NoteType, TriggerNoteMsg},
     util::*,
 };
+use std::collections::HashMap;
 use std::sync::mpsc;
-use std::{collections::HashMap, convert::TryFrom};
 
 pub fn midi_process_fct(
     midi_receiver: mpsc::Receiver<MidiMsgGeneric>,
@@ -29,7 +29,7 @@ pub fn midi_process_fct(
                 if let Some(midi_advanced_msg) = midi_advanced_msg {
                     let _id = midi_advanced_msg.get_id();
                     match midi_advanced_msg {
-                        MidiMsgAdvanced::MidiNoteOnOff(id0, id1, bvalue, note, intensity) => {
+                        MidiMsgAdvanced::MidiNoteOnOff(_id0, _id1, bvalue, note, intensity) => {
                             if bvalue == true {
                                 let velocity = intensity as f32 / 127.0;
                                 let note_on_msg = TriggerNoteMsg {
