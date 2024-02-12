@@ -79,3 +79,23 @@ pub fn parse_json_file_to_midi_functions_with_midi_msgs_advanced(
         serde_json::from_str(contents.as_str()).unwrap();
     Ok(map)
 }
+
+pub fn reverse_map_midi_functions2midi_advanced_msgs(
+    midi_functions_with_midi_advanced_msgs: HashMap<String, Vec<MidiMsgAdvanced>>,
+) -> HashMap<MidiMsgAdvanced, Vec<String>> {
+    let mut midi_advanced_msgs2midi_functions: HashMap<MidiMsgAdvanced, Vec<String>> =
+        HashMap::new();
+    for (key, value_vec) in midi_functions_with_midi_advanced_msgs {
+        let key_insert = key.clone();
+        for value in value_vec {
+            if let Some(ref mut midi_function_vec) =
+                midi_advanced_msgs2midi_functions.get_mut(&value)
+            {
+                midi_function_vec.push(key_insert.clone());
+            } else {
+                midi_advanced_msgs2midi_functions.insert(value, vec![key_insert.clone()]);
+            }
+        }
+    }
+    midi_advanced_msgs2midi_functions
+}
