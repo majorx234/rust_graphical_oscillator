@@ -78,7 +78,13 @@ impl eframe::App for OscillatorGui {
                 let rx_note_velocity2 = rx_note_velocity.clone();
                 //need a chain of crossbeam channels
                 let (tx_note_velocity, rx_note_velocity) = unbounded();
-                thread::spawn(|| repainter(ctx, Some(rx_note_velocity2), Some(tx_note_velocity)));
+                thread::spawn(|| {
+                    repainter::<TriggerNoteMsg>(
+                        ctx,
+                        Some(rx_note_velocity2),
+                        Some(tx_note_velocity),
+                    )
+                });
                 self.rx_note_velocity = Some(rx_note_velocity);
             }
             self.init_repainter_note_velocity = false;
@@ -88,7 +94,9 @@ impl eframe::App for OscillatorGui {
             if let Some(ref rx_midi_ctrl) = self.rx_midi_ctrl {
                 let rx_midi_ctrl2 = rx_midi_ctrl.clone();
                 let (tx_midi_ctrl, rx_midi_ctrl) = unbounded();
-                thread::spawn(|| repainter_midi_ctrl(ctx, Some(rx_midi_ctrl2), Some(tx_midi_ctrl)));
+                thread::spawn(|| {
+                    repainter::<(String, f32)>(ctx, Some(rx_midi_ctrl2), Some(tx_midi_ctrl))
+                });
                 self.rx_midi_ctrl = Some(rx_midi_ctrl);
             }
             self.init_repainter_midi_ctrl = false;
@@ -273,36 +281,17 @@ impl eframe::App for OscillatorGui {
     }
 }
 
-fn repainter(
+fn repainter<MsgType>(
     ctx: egui::Context,
-    rx_note_velocity: Option<crossbeam_channel::Receiver<TriggerNoteMsg>>,
-    tx_note_velocity: Option<crossbeam_channel::Sender<TriggerNoteMsg>>,
+    rx_msg: Option<crossbeam_channel::Receiver<MsgType>>,
+    tx_msg: Option<crossbeam_channel::Sender<MsgType>>,
 ) {
-    if let Some(rx_note_velocity) = rx_note_velocity {
+    if let Some(rx_msg) = rx_msg {
         loop {
-            if let Ok(trigger_note_msg) = rx_note_velocity.recv() {
-                if let Some(ref tx_note_velocity) = tx_note_velocity {
-                    if let Err(e) = tx_note_velocity.send(trigger_note_msg) {
-                        println!("could send trigger note in repainter e: {}", e);
-                    };
-                }
-            }
-            ctx.request_repaint();
-        }
-    }
-}
-
-fn repainter_midi_ctrl(
-    ctx: egui::Context,
-    rx_midi_ctrl: Option<crossbeam_channel::Receiver<(String, f32)>>,
-    tx_midi_ctrl: Option<crossbeam_channel::Sender<(String, f32)>>,
-) {
-    if let Some(rx_midi_ctrl) = rx_midi_ctrl {
-        loop {
-            if let Ok(midi_ctrl_msg) = rx_midi_ctrl.recv() {
-                if let Some(ref tx_midi_ctrl) = tx_midi_ctrl {
-                    if let Err(e) = tx_midi_ctrl.send(midi_ctrl_msg) {
-                        println!("could send trigger note in repainter e: {}", e);
+            if let Ok(trigger_msg) = rx_msg.recv() {
+                if let Some(ref tx_msg) = tx_msg {
+                    if let Err(e) = tx_msg.send(trigger_msg) {
+                        println!("could send trigger msg in repainter e: {}", e);
                     };
                 }
             }
