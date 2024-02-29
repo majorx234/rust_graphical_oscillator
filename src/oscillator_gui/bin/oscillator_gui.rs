@@ -1,6 +1,7 @@
+use bus::Bus;
 use crossbeam_channel::unbounded;
-use eframe::egui;
-use eframe::egui::plot::{Line, Plot, Value, Values};
+use eframe::egui::{self, ViewportCommand};
+use egui_plot::{Line, Plot, PlotPoints};
 use oscillator_lib::adsr::Adsr;
 use oscillator_lib::ctrl_msg::CtrlMsg;
 use oscillator_lib::trigger_note_msg::{NoteType, TriggerNoteMsg};
@@ -26,7 +27,7 @@ pub struct OscillatorGui {
     pub length: usize,
     pub jack_thread: Option<std::thread::JoinHandle<()>>,
     pub midi_thread: Option<std::thread::JoinHandle<()>>,
-    pub tx_close: Option<crossbeam_channel::Sender<bool>>,
+    pub tx_close: Option<Bus<bool>>,
     pub tx_ctrl: Option<std::sync::mpsc::Sender<CtrlMsg>>,
     pub tx_adsr: Option<std::sync::mpsc::Sender<Adsr>>,
     pub tx_trigger: Option<std::sync::mpsc::Sender<TriggerNoteMsg>>,
@@ -39,7 +40,7 @@ pub struct OscillatorGui {
 impl Default for OscillatorGui {
     fn default() -> Self {
         Self {
-            freq: 44.0,
+            freq: 440.0,
             velocity: 1.0,
             volume: 1.0,
             intensity_am: 1.0,
@@ -70,7 +71,7 @@ impl Default for OscillatorGui {
 
 impl eframe::App for OscillatorGui {
     /// Called once before the first frame.
-    fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
+    fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         if self.init_repainter_note_velocity {
             // singleton pattern as setup()
             let ctx = ctx.clone();
@@ -149,8 +150,8 @@ impl eframe::App for OscillatorGui {
             num_samples: self.num_samples,
             volume: self.volume,
         };
-        if let Some(x) = &self.tx_ctrl {
-            x.send(msg).unwrap();
+        if let Some(ref x) = self.tx_ctrl {
+            let _ = x.send(msg);
         }
         let msg_adsr = Adsr {
             ta: self.attack,
@@ -159,15 +160,16 @@ impl eframe::App for OscillatorGui {
             tr: self.release,
         };
         if let Some(x) = &self.tx_adsr {
-            x.send(msg_adsr).unwrap();
+            let _ = x.send(msg_adsr);
         }
-        let (values_size, values_data) = my_sine.gen_values();
+        let (_, values_data) = my_sine.gen_values();
+        /*
         let wave = (0..values_size).map(|i| {
             let x = i as f64;
-            Value::new(x, values_data[i] as f64)
-        });
+            (x, values_data[i] as f64)
+        });*/
 
-        let wave_line = Line::new(Values::from_values_iter(wave));
+        let wave_line = Line::new(PlotPoints::from_ys_f32(&values_data));
 
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.heading("Oscillator");
@@ -259,19 +261,20 @@ impl eframe::App for OscillatorGui {
                     ui.add(egui::Slider::new(&mut self.velocity, 0.0..=1.0));
 
                     if ui.button("close").clicked() {
-                        if let Some(x) = &self.tx_close {
-                            if let Err(e) = x.send(false) {
+                        if let Some(ref mut x) = self.tx_close {
+                            if let Err(e) = x.try_broadcast(false) {
                                 println!("could send close e: {}", e);
                             };
 
                             if let Some(jack_thread) = self.jack_thread.take() {
                                 jack_thread.join().unwrap();
                             }
+                            println!("jack_thread closed");
                             if let Some(midi_thread) = self.midi_thread.take() {
                                 midi_thread.join().unwrap();
                             }
-
-                            frame.quit();
+                            println!("midig_thread closed");
+                            ctx.send_viewport_cmd(ViewportCommand::Close)
                         };
                     }
                 })

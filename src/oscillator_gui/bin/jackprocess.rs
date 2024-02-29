@@ -1,5 +1,6 @@
 extern crate jack;
 extern crate wmidi;
+use bus::BusReader;
 use oscillator_lib::{
     adsr::Adsr, ctrl_msg::CtrlMsg, jackmidi::MidiMsgGeneric, tone_handling::ToneHandling,
     trigger_note_msg::TriggerNoteMsg,
@@ -7,7 +8,7 @@ use oscillator_lib::{
 use std::{process::exit, thread, time::Duration};
 
 pub fn start_jack_thread(
-    rx_close: crossbeam_channel::Receiver<bool>,
+    mut rx_close: BusReader<bool>,
     rx_ctrl: std::sync::mpsc::Receiver<CtrlMsg>,
     rx_adsr: std::sync::mpsc::Receiver<Adsr>,
     rx_trigger: std::sync::mpsc::Receiver<TriggerNoteMsg>,
@@ -127,8 +128,8 @@ pub fn start_jack_thread(
             }
         }
         match active_client.deactivate() {
-            Ok(_) => println!("exit audio thread\n"),
-            Err(_) => println!("exit audio thread,client deactivation err\n"),
+            Ok(_) => println!("exit jackaudio thread\n"),
+            Err(_) => println!("exit jackaudio thread,client deactivation err\n"),
         }
     })
 }

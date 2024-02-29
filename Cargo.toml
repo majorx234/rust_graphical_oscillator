@@ -21,7 +21,9 @@ name = "tone_handling_example"
 path = "src/oscillator_gui/bin/tone_handling_example.rs"
 
 [dependencies]
-eframe = { version = "0.18.0"}
+bus = { version = "2.4.1" }
+eframe = { version = "0.26.2" }
+egui_plot = { version = "0.26.2" }
 scan_fmt = "0.2.6"
 jack = "0.10.0"
 serde = { version = "1.0.193", features = ["derive"]}

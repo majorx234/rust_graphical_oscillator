@@ -1,5 +1,5 @@
 use crossbeam_channel::unbounded;
-use eframe;
+use eframe::egui::ViewportBuilder;
 use std::{collections::HashMap, sync::mpsc};
 mod oscillator_gui;
 use oscillator_gui::OscillatorGui;
@@ -12,6 +12,7 @@ use oscillator_lib::{
     midi_process::midi_process_fct,
 };
 mod jackprocess;
+use bus::Bus;
 use clap::Parser;
 use jackprocess::start_jack_thread;
 use oscillator_lib::trigger_note_msg::TriggerNoteMsg;
@@ -43,8 +44,10 @@ fn main() {
         midi_advanced_msgs2midi_functions =
             reverse_map_midi_functions2midi_advanced_msgs(midi_functions_with_midi_advanced_msgs);
     }
-    let (tx_close, rx1_close) = unbounded();
-    let rx2_close = rx1_close.clone();
+    let mut tx_close_bus = Bus::new(10);
+    let rx_close_bus1 = tx_close_bus.add_rx();
+    let rx_close_bus2 = tx_close_bus.add_rx();
+    //let (tx_close, rx1_close) = unbounded();
     let (tx_ctrl, rx_ctrl) = mpsc::channel();
     let (tx_adsr, rx_adsr) = mpsc::channel();
     let (tx_trigger, rx_trigger) = mpsc::channel();
@@ -66,14 +69,14 @@ fn main() {
         midi_receiver,
         tx_note_velocity,
         tx_trigger2,
-        rx1_close,
+        rx_close_bus1,
         Some(tx_midi_ctrl),
         Some(midi_advanced_msgs2midi_functions),
     );
 
-    let jack_thread = start_jack_thread(rx2_close, rx_ctrl, rx_adsr, rx_trigger, midi_sender);
+    let jack_thread = start_jack_thread(rx_close_bus2, rx_ctrl, rx_adsr, rx_trigger, midi_sender);
     let graphical_osci_app = OscillatorGui {
-        freq: 44.0,
+        freq: 440.0,
         velocity: 1.0,
         volume: 1.0,
         intensity_am: 1.0,
@@ -90,7 +93,7 @@ fn main() {
         length: 96000,
         jack_thread: Some(jack_thread),
         midi_thread: Some(midi_thread),
-        tx_close: Some(tx_close),
+        tx_close: Some(tx_close_bus),
         tx_ctrl: Some(tx_ctrl),
         tx_adsr: Some(tx_adsr),
         tx_trigger: Some(tx_trigger),
@@ -99,10 +102,11 @@ fn main() {
         init_repainter_note_velocity: true,
         init_repainter_midi_ctrl: true,
     };
-    let mut options = eframe::NativeOptions::default();
-    let window_size: eframe::egui::Vec2 = eframe::egui::Vec2::new(800.0, 600.0);
-    options.initial_window_size = Some(window_size);
-    eframe::run_native(
+    let options = eframe::NativeOptions {
+        viewport: ViewportBuilder::default().with_inner_size([600.0, 600.0]),
+        ..Default::default()
+    };
+    let _ = eframe::run_native(
         "Oscillator",
         options,
         Box::new(|_cc| Box::new(graphical_osci_app)),
