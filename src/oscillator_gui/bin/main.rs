@@ -47,7 +47,6 @@ fn main() {
     let mut tx_close_bus = Bus::new(10);
     let rx_close_bus1 = tx_close_bus.add_rx();
     let rx_close_bus2 = tx_close_bus.add_rx();
-    //let (tx_close, rx1_close) = unbounded();
     let (tx_ctrl, rx_ctrl) = mpsc::channel();
     let (tx_adsr, rx_adsr) = mpsc::channel();
     let (tx_trigger, rx_trigger) = mpsc::channel();

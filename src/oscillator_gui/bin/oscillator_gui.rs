@@ -1,6 +1,6 @@
 use bus::Bus;
 use crossbeam_channel::unbounded;
-use eframe::egui::{self, ViewportCommand};
+use eframe::egui::{self, PointerButton, ViewportCommand};
 use egui_plot::{Line, Plot, PlotPoints};
 use oscillator_lib::adsr::Adsr;
 use oscillator_lib::ctrl_msg::CtrlMsg;
@@ -163,11 +163,6 @@ impl eframe::App for OscillatorGui {
             let _ = x.send(msg_adsr);
         }
         let (_, values_data) = my_sine.gen_values();
-        /*
-        let wave = (0..values_size).map(|i| {
-            let x = i as f64;
-            (x, values_data[i] as f64)
-        });*/
 
         let wave_line = Line::new(PlotPoints::from_ys_f32(&values_data));
 
@@ -230,33 +225,38 @@ impl eframe::App for OscillatorGui {
                         drag: true,
                         focusable: true,
                     });
-                    if trigger_button.drag_started() {
-                        if let Some(x) = &self.tx_trigger {
-                            let trigger_note = TriggerNoteMsg {
-                                note_type: NoteType::NoteOn,
-                                freq: self.freq,
-                                velocity: self.velocity,
-                                length: self.length,
-                            };
-                            if let Err(e) = x.send(trigger_note) {
-                                println!("could send trigger_note e: {}", e);
-                            };
-                        }
-                    } else {
-                        if trigger_button.drag_released() {
+                    let triger_button_rect = trigger_button.rect;
+                    ui.input(|input| {
+                        if input.pointer.button_pressed(PointerButton::Primary)
+                            && triger_button_rect.contains(input.pointer.press_origin().unwrap())
+                        {
                             if let Some(x) = &self.tx_trigger {
-                                let trigger_note_off = TriggerNoteMsg {
-                                    note_type: NoteType::NoteOff,
+                                let trigger_note = TriggerNoteMsg {
+                                    note_type: NoteType::NoteOn,
                                     freq: self.freq,
                                     velocity: self.velocity,
                                     length: self.length,
                                 };
-                                if let Err(e) = x.send(trigger_note_off) {
-                                    println!("could send trigger_note_off e: {}", e);
+                                if let Err(e) = x.send(trigger_note) {
+                                    println!("could send trigger_note e: {}", e);
                                 };
                             }
+                        } else {
+                            if input.pointer.button_released(PointerButton::Primary) {
+                                if let Some(x) = &self.tx_trigger {
+                                    let trigger_note_off = TriggerNoteMsg {
+                                        note_type: NoteType::NoteOff,
+                                        freq: self.freq,
+                                        velocity: self.velocity,
+                                        length: self.length,
+                                    };
+                                    if let Err(e) = x.send(trigger_note_off) {
+                                        println!("could send trigger_note_off e: {}", e);
+                                    };
+                                }
+                            }
                         }
-                    }
+                    });
                     ui.label("Velocity: ");
                     ui.add(egui::Slider::new(&mut self.velocity, 0.0..=1.0));
 
@@ -280,7 +280,6 @@ impl eframe::App for OscillatorGui {
                 })
             });
         });
-        //        ctx.request_repaint();
     }
 }
 
