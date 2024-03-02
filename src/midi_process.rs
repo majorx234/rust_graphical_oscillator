@@ -4,15 +4,15 @@ use crate::{
     util::*,
 };
 use bus::BusReader;
+use crossbeam_channel::{Receiver, Sender};
 use std::collections::HashMap;
-use std::sync::mpsc;
 
 pub fn midi_process_fct(
-    midi_receiver: mpsc::Receiver<MidiMsgGeneric>,
-    tx_note_velocity: crossbeam_channel::Sender<TriggerNoteMsg>,
-    tx_trigger: mpsc::Sender<TriggerNoteMsg>,
+    midi_receiver: Receiver<MidiMsgGeneric>,
+    tx_note_velocity: Sender<TriggerNoteMsg>,
+    tx_trigger: Sender<TriggerNoteMsg>,
     mut rx1_close: BusReader<bool>,
-    tx_midi_ctrl: Option<crossbeam_channel::Sender<(String, f32)>>,
+    tx_midi_ctrl: Option<Sender<(String, f32)>>,
     midi_advanced_msgs2midi_functions: Option<HashMap<MidiMsgAdvanced, Vec<String>>>,
 ) -> std::thread::JoinHandle<()> {
     std::thread::spawn(move || {
@@ -31,7 +31,7 @@ pub fn midi_process_fct(
                     let _id = midi_advanced_msg.get_id();
                     match midi_advanced_msg {
                         MidiMsgAdvanced::MidiNoteOnOff(_id0, _id1, bvalue, note, intensity) => {
-                            if bvalue == true {
+                            if bvalue {
                                 let velocity = intensity as f32 / 127.0;
                                 let note_on_msg = TriggerNoteMsg {
                                     note_type: NoteType::NoteOn,

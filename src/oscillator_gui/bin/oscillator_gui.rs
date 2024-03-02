@@ -1,5 +1,5 @@
 use bus::Bus;
-use crossbeam_channel::unbounded;
+use crossbeam_channel::{unbounded, Receiver, Sender};
 use eframe::egui::{self, PointerButton, ViewportCommand};
 use egui_plot::{Line, Plot, PlotPoints};
 use oscillator_lib::adsr::Adsr;
@@ -28,11 +28,11 @@ pub struct OscillatorGui {
     pub jack_thread: Option<std::thread::JoinHandle<()>>,
     pub midi_thread: Option<std::thread::JoinHandle<()>>,
     pub tx_close: Option<Bus<bool>>,
-    pub tx_ctrl: Option<std::sync::mpsc::Sender<CtrlMsg>>,
-    pub tx_adsr: Option<std::sync::mpsc::Sender<Adsr>>,
-    pub tx_trigger: Option<std::sync::mpsc::Sender<TriggerNoteMsg>>,
-    pub rx_note_velocity: Option<crossbeam_channel::Receiver<TriggerNoteMsg>>,
-    pub rx_midi_ctrl: Option<crossbeam_channel::Receiver<(String, f32)>>,
+    pub tx_ctrl: Option<Sender<CtrlMsg>>,
+    pub tx_adsr: Option<Sender<Adsr>>,
+    pub tx_trigger: Option<Sender<TriggerNoteMsg>>,
+    pub rx_note_velocity: Option<Receiver<TriggerNoteMsg>>,
+    pub rx_midi_ctrl: Option<Receiver<(String, f32)>>,
     pub init_repainter_note_velocity: bool,
     pub init_repainter_midi_ctrl: bool,
 }
@@ -285,8 +285,8 @@ impl eframe::App for OscillatorGui {
 
 fn repainter<MsgType>(
     ctx: egui::Context,
-    rx_msg: Option<crossbeam_channel::Receiver<MsgType>>,
-    tx_msg: Option<crossbeam_channel::Sender<MsgType>>,
+    rx_msg: Option<Receiver<MsgType>>,
+    tx_msg: Option<Sender<MsgType>>,
 ) {
     if let Some(rx_msg) = rx_msg {
         loop {

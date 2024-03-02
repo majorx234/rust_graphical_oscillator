@@ -1,6 +1,6 @@
-use crossbeam_channel::unbounded;
+use crossbeam_channel::{unbounded, Receiver, Sender};
 use eframe::egui::ViewportBuilder;
-use std::{collections::HashMap, sync::mpsc};
+use std::collections::HashMap;
 mod oscillator_gui;
 use oscillator_gui::OscillatorGui;
 use oscillator_lib::{
@@ -47,22 +47,16 @@ fn main() {
     let mut tx_close_bus = Bus::new(10);
     let rx_close_bus1 = tx_close_bus.add_rx();
     let rx_close_bus2 = tx_close_bus.add_rx();
-    let (tx_ctrl, rx_ctrl) = mpsc::channel();
-    let (tx_adsr, rx_adsr) = mpsc::channel();
-    let (tx_trigger, rx_trigger) = mpsc::channel();
+    let (tx_ctrl, rx_ctrl) = unbounded();
+    let (tx_adsr, rx_adsr) = unbounded();
+    let (tx_trigger, rx_trigger) = unbounded();
     let tx_trigger2 = tx_trigger.clone();
-    let (tx_note_velocity, rx_note_velocity): (
-        crossbeam_channel::Sender<TriggerNoteMsg>,
-        crossbeam_channel::Receiver<TriggerNoteMsg>,
-    ) = unbounded();
-    let (midi_sender, midi_receiver): (
-        std::sync::mpsc::SyncSender<MidiMsgGeneric>,
-        std::sync::mpsc::Receiver<MidiMsgGeneric>,
-    ) = mpsc::sync_channel(64);
-    let (tx_midi_ctrl, rx_midi_ctrl): (
-        crossbeam_channel::Sender<(String, f32)>,
-        crossbeam_channel::Receiver<(String, f32)>,
-    ) = unbounded();
+    let (tx_note_velocity, rx_note_velocity): (Sender<TriggerNoteMsg>, Receiver<TriggerNoteMsg>) =
+        unbounded();
+    let (midi_sender, midi_receiver): (Sender<MidiMsgGeneric>, Receiver<MidiMsgGeneric>) =
+        unbounded();
+    let (tx_midi_ctrl, rx_midi_ctrl): (Sender<(String, f32)>, Receiver<(String, f32)>) =
+        unbounded();
     // midi msg test thread
     let midi_thread = midi_process_fct(
         midi_receiver,
