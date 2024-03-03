@@ -99,14 +99,14 @@ impl ToneHandling {
                 let mut frame_l: Vec<f32> = vec![0.0; frame_size];
                 let mut frame_r: Vec<f32> = vec![0.0; frame_size];
 
-                tone.sine_wave_generator.ctrl(&ctrl_msg, tone.freq);
+                tone.sine_wave_generator.ctrl(ctrl_msg, tone.freq);
                 tone.sine_wave_generator
                     .process_samples(&mut frame_l, &mut frame_r);
                 match &tone.envelope {
                     Some(envelope) => {
                         tone.adsr_envelope.multiply_buf(
                             &mut frame_l,
-                            &envelope,
+                            envelope,
                             tone.start_pose,
                             tone.length,
                             frame_size,
@@ -116,7 +116,7 @@ impl ToneHandling {
                         );
                         tone.adsr_envelope.multiply_buf(
                             &mut frame_r,
-                            &envelope,
+                            envelope,
                             tone.start_pose,
                             tone.length,
                             frame_size,
@@ -147,14 +147,13 @@ impl ToneHandling {
 
     pub fn get_last_sustain_values_of_entry(&self, freq_index: f32) -> (f32, f32) {
         match self.tone_map.get(freq_index) {
-            Some(tone) => return (tone.last_sustain_value_a, tone.last_sustain_value_b),
+            Some(tone) => (tone.last_sustain_value_a, tone.last_sustain_value_b),
             None => (0.0, 0.0),
         }
     }
     pub fn get_sine_wave_generator_of_entry(&self, freq_index: f32) -> Option<SineWaveGenerator> {
-        match self.tone_map.get(freq_index) {
-            Some(tone) => return Some(tone.sine_wave_generator.clone()),
-            None => None,
-        }
+        self.tone_map
+            .get(freq_index)
+            .map(|tone| tone.sine_wave_generator.clone())
     }
 }
