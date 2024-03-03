@@ -1,3 +1,5 @@
+use crate::effect::Effect;
+
 pub struct CtrlMsg {
     pub size: usize,
     pub intensity_am: f32,
@@ -8,4 +10,5 @@ pub struct CtrlMsg {
     pub phase_fm: f32,
     pub num_samples: usize,
     pub volume: f32,
+    pub effect: Option<Box<dyn Effect>>,
 }

@@ -149,6 +149,7 @@ impl eframe::App for OscillatorGui {
             phase_fm: self.phase_fm,
             num_samples: self.num_samples,
             volume: self.volume,
+            effect: None,
         };
         if let Some(ref x) = self.tx_ctrl {
             let _ = x.send(msg);

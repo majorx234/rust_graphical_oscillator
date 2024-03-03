@@ -65,6 +65,7 @@ pub fn start_jack_thread(
             phase_fm: 0.0,
             num_samples: frame_size,
             volume: 1.0,
+            effect: None,
         };
 
         let mut adsr_envelope = Adsr::new(0.1, 0.2, 0.5, 0.2);
