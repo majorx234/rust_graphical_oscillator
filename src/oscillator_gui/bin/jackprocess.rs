@@ -69,6 +69,8 @@ pub fn start_jack_thread(
         };
 
         let mut adsr_envelope = Adsr::new(0.1, 0.2, 0.5, 0.2);
+        let mut effect_in_l: Vec<f32> = vec![1.0; frame_size];
+        let mut effect_in_r: Vec<f32> = vec![1.0; frame_size];
 
         let process_callback = move |_: &jack::Client, ps: &jack::ProcessScope| -> jack::Control {
             let show_p = midi_in.iter(ps);
@@ -98,22 +100,52 @@ pub fn start_jack_thread(
                 tone_handling.add_note_msg(rx_trigger_msg, adsr_envelope.clone(), frame_size);
             };
 
-            tone_handling.process_tones(
-                &ctrl_msg,
-                out_a_p,
-                out_b_p,
-                &mut multiply_out_l,
-                &mut multiply_out_r,
-                frame_size,
-            );
+            if ctrl_msg.effect.is_some() {
+                let out_a_p_inter = effect_in_l.as_mut_slice();
+                let out_b_p_inter = effect_in_r.as_mut_slice();
 
-            tone_handling.normalize_out(
-                out_a_p,
-                out_b_p,
-                &mut multiply_out_l,
-                &mut multiply_out_r,
-                frame_size,
-            );
+                tone_handling.process_tones(
+                    &ctrl_msg,
+                    out_a_p_inter,
+                    out_b_p_inter,
+                    &mut multiply_out_l,
+                    &mut multiply_out_r,
+                    frame_size,
+                );
+
+                tone_handling.normalize_out(
+                    out_a_p_inter,
+                    out_b_p_inter,
+                    &mut multiply_out_l,
+                    &mut multiply_out_r,
+                    frame_size,
+                );
+                if let Some(ref mut effect) = ctrl_msg.effect {
+                    effect.process_samples(
+                        Some(out_a_p_inter),
+                        Some(out_b_p_inter),
+                        Some(out_a_p),
+                        Some(out_b_p),
+                    );
+                };
+            } else {
+                tone_handling.process_tones(
+                    &ctrl_msg,
+                    out_a_p,
+                    out_b_p,
+                    &mut multiply_out_l,
+                    &mut multiply_out_r,
+                    frame_size,
+                );
+
+                tone_handling.normalize_out(
+                    out_a_p,
+                    out_b_p,
+                    &mut multiply_out_l,
+                    &mut multiply_out_r,
+                    frame_size,
+                );
+            }
 
             jack::Control::Continue
         };
