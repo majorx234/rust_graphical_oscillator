@@ -5,6 +5,8 @@ use eframe::egui::{self, PointerButton, ViewportCommand};
 use egui_plot::{Line, Plot, PlotPoints};
 use oscillator_lib::adsr::Adsr;
 use oscillator_lib::ctrl_msg::CtrlMsg;
+use oscillator_lib::effect::Effect;
+use oscillator_lib::overdrive::Overdrive;
 use oscillator_lib::trigger_note_msg::{NoteType, TriggerNoteMsg};
 use oscillator_lib::wave_gen::SineWave;
 use std::f32::consts::PI;
@@ -144,6 +146,10 @@ impl eframe::App for OscillatorGui {
                 _velocity = trigger_note_msg.velocity;
             };
         };
+        let mut effect: Option<Box<dyn Effect>> = None;
+        if self.overdrive_toggle {
+            effect = Some(Box::new(Overdrive::new()));
+        }
         let msg = CtrlMsg {
             size: 1024,
             intensity_am: self.intensity_am,
@@ -154,7 +160,7 @@ impl eframe::App for OscillatorGui {
             phase_fm: self.phase_fm,
             num_samples: self.num_samples,
             volume: self.volume,
-            effect: None,
+            effect,
         };
         if let Some(ref x) = self.tx_ctrl {
             let _ = x.send(msg);
