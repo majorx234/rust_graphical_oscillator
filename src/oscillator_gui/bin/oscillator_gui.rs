@@ -1,3 +1,4 @@
+use crate::status_button::status_button;
 use bus::Bus;
 use crossbeam_channel::{unbounded, Receiver, Sender};
 use eframe::egui::{self, PointerButton, ViewportCommand};
@@ -35,6 +36,8 @@ pub struct OscillatorGui {
     pub rx_midi_ctrl: Option<Receiver<(String, f32)>>,
     pub init_repainter_note_velocity: bool,
     pub init_repainter_midi_ctrl: bool,
+    pub overdrive_toggle: bool,
+    pub overdrive: f32,
 }
 
 impl Default for OscillatorGui {
@@ -65,6 +68,8 @@ impl Default for OscillatorGui {
             rx_midi_ctrl: None,
             init_repainter_note_velocity: true,
             init_repainter_midi_ctrl: true,
+            overdrive_toggle: false,
+            overdrive: 0.0,
         }
     }
 }
@@ -199,6 +204,11 @@ impl eframe::App for OscillatorGui {
                 ui.horizontal(|ui| {
                     ui.label("Phase AM: ");
                     ui.add(egui::Slider::new(&mut self.phase_fm, 0.0..=6.283));
+                });
+                ui.horizontal(|ui| {
+                    ui.label("Overdrive: ");
+                    ui.add(status_button(&mut self.overdrive_toggle));
+                    ui.add(egui::Slider::new(&mut self.overdrive, 0.0..=1.0));
                 });
 
                 ui.horizontal(|ui| {

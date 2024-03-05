@@ -16,6 +16,7 @@ use bus::Bus;
 use clap::Parser;
 use jackprocess::start_jack_thread;
 use oscillator_lib::trigger_note_msg::TriggerNoteMsg;
+mod status_button;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -94,6 +95,8 @@ fn main() {
         rx_midi_ctrl: Some(rx_midi_ctrl),
         init_repainter_note_velocity: true,
         init_repainter_midi_ctrl: true,
+        overdrive_toggle: false,
+        overdrive: 0.0,
     };
     let options = eframe::NativeOptions {
         viewport: ViewportBuilder::default().with_inner_size([600.0, 600.0]),
