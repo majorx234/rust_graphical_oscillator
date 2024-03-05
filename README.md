@@ -35,6 +35,10 @@ cargo run
 ```
 
 # ToDo
+- Fix crackling and clicking  when Overdrive is turn on/off
+- Rewrite effect signal flow
+- GUI with better Wave scaling
+- GUI with real wave shape (with all parameters)
 - Add windowing to prevent clipping
 - LP,BP,HP filter
 - Effects
@@ -47,6 +51,7 @@ cargo run
 - update GUI with visualization of ADSR
 
 # History
+- 20240305 Add first effect overdrive
 - 20240210 Add Midiconfiguration
 - 20221230 velocity sensitive Midi control of tones
 - 20221025 polyphon tone generation over midi
