@@ -3,6 +3,7 @@ use crate::effect::Effect;
 pub struct Overdrive {
     pub bypassing: bool,
     symetrical: bool,
+    gain: f32,
 }
 
 impl Overdrive {
@@ -12,6 +13,15 @@ impl Overdrive {
     pub fn unset_symetrical(&mut self) {
         self.symetrical = false;
     }
+    pub fn set_gain(&mut self, new_gain: f32) {
+        if new_gain < 0.0 {
+            self.gain = 0.0;
+        } else if new_gain > 10.0 {
+            self.gain = 10.0;
+        } else {
+            self.gain = new_gain;
+        }
+    }
 }
 
 impl Effect for Overdrive {
@@ -19,6 +29,7 @@ impl Effect for Overdrive {
         Overdrive {
             bypassing: false,
             symetrical: true,
+            gain: 0.0,
         }
     }
     fn name(&self) -> &'static str {
@@ -49,7 +60,7 @@ impl Effect for Overdrive {
             let sign = x.signum();
             let x = x.abs();
             if 0.0 < x && x < 0.333 {
-                sign * 2.0 * x
+                sign * self.gain * x
             } else if 0.333 < x && x < 0.666 {
                 let t = 2.0 - 3.0 * x;
                 sign * (3.0 - t * t) / 3.0
