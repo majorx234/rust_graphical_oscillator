@@ -59,9 +59,9 @@ impl Effect for Overdrive {
         let symetrical_softclip = |x: f32| {
             let sign = x.signum();
             let x = x.abs();
-            if 0.0 < x && x < 0.333 {
-                sign * self.gain * x
-            } else if 0.333 < x && x < 0.666 {
+            if 0.0 < x && x < 1.0 / 3.0 {
+                sign * 2.0 * x
+            } else if 1.0 / 3.0 < x && x < 2.0 / 3.0 {
                 let t = 2.0 - 3.0 * x;
                 sign * (3.0 - t * t) / 3.0
             } else {
@@ -71,9 +71,9 @@ impl Effect for Overdrive {
 
         let unsymetrical_softclip = |x: f32| {
             let x = x.abs();
-            if 0.0 < x && x < 0.333 {
+            if 0.0 < x && x < 1.0 / 3.0 {
                 2.0 * x
-            } else if 0.333 < x && x < 0.666 {
+            } else if 1.0 / 3.0 < x && x < 2.0 / 3.0 {
                 let t = 2.0 - 3.0 * x;
                 (3.0 - t * t) / 3.0
             } else {
