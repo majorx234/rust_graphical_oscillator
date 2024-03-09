@@ -36,6 +36,7 @@ cargo run
 
 # ToDo
 - Fix crackling and clicking  when Overdrive is turn on/off
+- use audio buffers: adui_boffer to have iterors
 - Rewrite effect signal flow
 - GUI with better Wave scaling
 - GUI with real wave shape (with all parameters)
@@ -49,6 +50,8 @@ cargo run
 - add configurable Midi setup
   - mostly done, need to put midi handling in seperate crate to reuse
 - update GUI with visualization of ADSR
+- add direct pipewire interface
+- update documentation
 
 # History
 - 20240305 Add first effect overdrive
