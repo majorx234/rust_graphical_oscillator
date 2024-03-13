@@ -56,8 +56,8 @@ impl Effect for Overdrive {
             return;
         }
 
-        let symetrical_softclip: fn(f32) -> f32 = |x: f32| {
-            let x = x * self.gain;
+        let symetrical_softclip: fn(f32, f32) -> f32 = |x: f32, gain: f32| {
+            let x = x * gain;
             let sign = x.signum();
             let x = x.abs();
             if 0.0 < x && x < 1.0 / 3.0 {
@@ -70,8 +70,8 @@ impl Effect for Overdrive {
             }
         };
 
-        let unsymetrical_softclip: fn(f32) -> f32 = |x: f32| {
-            let x = x * self.gain;
+        let unsymetrical_softclip: fn(f32, f32) -> f32 = |x: f32, gain: f32| {
+            let x = x * gain;
             let x = x.abs();
             if 0.0 < x && x < 1.0 / 3.0 {
                 2.0 * x
@@ -93,7 +93,7 @@ impl Effect for Overdrive {
             if let Some(input) = input {
                 if let Some(output) = output {
                     for (index, xl) in input.iter().enumerate() {
-                        output[index] = softclip(*xl);
+                        output[index] = softclip(*xl, self.gain);
                     }
                     if !self.symetrical {
                         let average = output.iter().sum::<f32>() / (output.len() as f32);
