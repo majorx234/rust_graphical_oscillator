@@ -122,6 +122,7 @@ impl eframe::App for OscillatorGui {
                     "intensity_fm" => self.intensity_fm = value * 100.0,
                     "freq_fm" => self.freq_fm = value * 10.0,
                     "phase_fm" => self.phase_fm = value * 2.0 * PI,
+                    "overdrive_gain" => self.overdrive = value * 10.0,
                     &_ => (),
                 }
             }
@@ -148,7 +149,9 @@ impl eframe::App for OscillatorGui {
         };
         let mut effect: Option<Box<dyn Effect>> = None;
         if self.overdrive_toggle {
-            effect = Some(Box::new(Overdrive::new()));
+            let mut overdrive = Overdrive::new();
+            overdrive.set_gain(self.overdrive);
+            effect = Some(Box::new(overdrive));
         }
         let msg = CtrlMsg {
             size: 1024,
@@ -199,7 +202,10 @@ impl eframe::App for OscillatorGui {
                 });
                 ui.horizontal(|ui| {
                     ui.label("Phase AM: ");
-                    ui.add(egui::Slider::new(&mut self.phase_am, 0.0..=6.283));
+                    ui.add(egui::Slider::new(
+                        &mut self.phase_am,
+                        0.0..=std::f32::consts::TAU,
+                    ));
                 });
                 ui.horizontal(|ui| {
                     ui.label("Intensity FM: ");
@@ -209,12 +215,15 @@ impl eframe::App for OscillatorGui {
                 });
                 ui.horizontal(|ui| {
                     ui.label("Phase AM: ");
-                    ui.add(egui::Slider::new(&mut self.phase_fm, 0.0..=6.283));
+                    ui.add(egui::Slider::new(
+                        &mut self.phase_fm,
+                        0.0..=std::f32::consts::TAU,
+                    ));
                 });
                 ui.horizontal(|ui| {
                     ui.label("Overdrive: ");
                     ui.add(status_button(&mut self.overdrive_toggle));
-                    ui.add(egui::Slider::new(&mut self.overdrive, 0.0..=1.0));
+                    ui.add(egui::Slider::new(&mut self.overdrive, 0.0..=10.0));
                 });
 
                 ui.horizontal(|ui| {

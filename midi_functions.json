@@ -6,5 +6,6 @@
         {"name": "intensity_fm"},
         {"name": "freq_fm"},
         {"name": "phase_fm"}
+        {"name": "self.overdrive_gain"}
   ]
 }
