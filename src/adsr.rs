@@ -14,17 +14,14 @@ impl Adsr {
     }
 
     pub fn generate_adsr_note_on_envelope(&self, size: usize, last_value: f32) -> Vec<f32> {
-        let adsr_sum = self.ta + self.td + self.ts + self.tr;
-        let norm_ta = (self.ta / adsr_sum).min(1.0);
-        let norm_td = (self.td / adsr_sum).min(1.0);
-        let norm_ts = (self.ts / adsr_sum).min(1.0);
-        let _norm_tr = (self.tr / adsr_sum).min(1.0);
+        let ad_sum = self.ta + self.td;
+        let norm_ta = (self.ta / ad_sum);
 
         let mut values_data: Vec<f32> = Vec::with_capacity(size);
         let fmax_attack: f32 = norm_ta * size as f32;
-        let fmax_decay: f32 = norm_td * size as f32;
+        let fmax_decay: f32 = size as f32 - fmax_attack;
 
-        let sustain_value: f32 = norm_ts;
+        let sustain_value: f32 = self.ts;
 
         let max_attack: u32 = fmax_attack as u32;
         let max_decay: u32 = fmax_decay as u32;
