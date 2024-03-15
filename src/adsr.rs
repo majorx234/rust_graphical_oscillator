@@ -15,28 +15,36 @@ impl Adsr {
 
     pub fn generate_adsr_note_on_envelope(&self, size: usize, last_value: f32) -> Vec<f32> {
         let ad_sum = self.ta + self.td;
-        let norm_ta = (self.ta / ad_sum);
+        let mut norm_ta = self.ta / ad_sum;
+        let mut norm_td = self.td / ad_sum;
+        if ad_sum < 1.0 {
+            norm_ta = self.ta;
+            norm_td = self.td;
+        }
+        let mut values_data: Vec<f32> = vec![self.ts; size];
 
-        let mut values_data: Vec<f32> = Vec::with_capacity(size);
-        let fmax_attack: f32 = norm_ta * size as f32;
-        let fmax_decay: f32 = size as f32 - fmax_attack;
+        let fmax_attack: f32 = norm_ta * (size - 1) as f32;
+        let fmax_decay: f32 = norm_td * (size - 1) as f32;
 
         let sustain_value: f32 = self.ts;
 
-        let max_attack: u32 = fmax_attack as u32;
-        let max_decay: u32 = fmax_decay as u32;
+        let max_attack: u32 = (fmax_attack as u32).min(size as u32);
+        let max_decay: u32 = (fmax_decay as u32).min(size as u32);
 
         for n in 0..max_attack {
             let s: f32 = last_value + (1.0 - last_value) * ((n % max_attack) as f32) / fmax_attack;
-            values_data.push(s);
+            values_data[n as usize] = s;
         }
+        let max_attack_decay = (max_attack + max_decay).min(size as u32);
         for n in max_attack..(max_attack + max_decay) {
             let j: u32 = n - max_attack;
             let s: f32 = 1.0 - ((1.0 - sustain_value) * ((j % max_decay) as f32) / fmax_decay);
-            values_data.push(s);
+            values_data[n as usize] = s;
         }
-        for _n in (max_attack + max_decay)..size as u32 {
-            values_data.push(sustain_value);
+        if max_attack_decay < size as u32 {
+            for n in (max_attack + max_decay)..size as u32 {
+                values_data[n as usize] = sustain_value;
+            }
         }
         values_data
     }
