@@ -93,9 +93,23 @@ impl Adsr {
                 nsamples = (startpose + frame_size) - sample_length;
             }
         }
-
-        for n in 0..nsamples {
-            in_audio[n] *= velocity * adsr_env[n + startpose];
+        let adsr_length = adsr_env.len();
+        if adsr_length > nsamples + startpose {
+            for n in 0..nsamples {
+                in_audio[n] *= velocity * adsr_env[n + startpose];
+            }
+        } else if adsr_length > startpose {
+            let nsamples_max = (adsr_length - startpose) % frame_size;
+            for n in 0..nsamples_max {
+                in_audio[n] *= velocity * adsr_env[n + startpose];
+            }
+            for n in nsamples_max..nsamples {
+                in_audio[n] *= velocity * adsr_env[nsamples_max + startpose - 1];
+            }
+        } else {
+            for n in 0..nsamples {
+                in_audio[n] *= velocity * adsr_env[adsr_length - 1];
+            }
         }
         for n in nsamples..frame_size {
             in_audio[n] *= velocity * factor;
