@@ -71,7 +71,7 @@ impl Default for OscillatorGui {
             init_repainter_note_velocity: true,
             init_repainter_midi_ctrl: true,
             overdrive_toggle: false,
-            overdrive: 0.0,
+            overdrive: 1.0,
         }
     }
 }

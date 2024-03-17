@@ -96,7 +96,7 @@ fn main() {
         init_repainter_note_velocity: true,
         init_repainter_midi_ctrl: true,
         overdrive_toggle: false,
-        overdrive: 0.0,
+        overdrive: 1.0,
     };
     let options = eframe::NativeOptions {
         viewport: ViewportBuilder::default().with_inner_size([600.0, 600.0]),

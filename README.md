@@ -35,7 +35,6 @@ cargo run
 ```
 
 # ToDo
-- Fix crackling and clicking  when Overdrive is turn on/off
 - use audio buffers: adui_boffer to have iterors
 - Rewrite effect signal flow
 - GUI with better Wave scaling
@@ -43,6 +42,7 @@ cargo run
 - Add windowing to prevent clipping
 - LP,BP,HP filter
 - Effects
+- delay effect
 - put wave generation in extra thread and copy data via ring buffer
 - handle wave generation with pool allacoation (no malloc in jack thread)
 - add wav-file export
