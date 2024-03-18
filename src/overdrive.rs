@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::effect::Effect;
 
 pub struct Overdrive {
@@ -32,9 +34,15 @@ impl Effect for Overdrive {
             gain: 0.0,
         }
     }
+
     fn name(&self) -> &'static str {
         "overdrive"
     }
+
+    fn set_params(&mut self, params: HashMap<String, Vec<String>>) {
+        // Todo
+    }
+
     fn process_samples(
         &mut self,
         input_l: Option<&[f32]>,

@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::effect::Effect;
 
 pub struct Delay {
@@ -49,6 +51,10 @@ impl Effect for Delay {
     fn name(&self) -> &'static str {
         "Delay"
     }
+    fn set_params(&mut self, params: HashMap<String, Vec<String>>) {
+        // Todo
+    }
+
     fn process_samples(
         &mut self,
         input_l: Option<&[f32]>,
