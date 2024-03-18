@@ -267,19 +267,17 @@ impl eframe::App for OscillatorGui {
                                     println!("could send trigger_note e: {}", e);
                                 };
                             }
-                        } else {
-                            if input.pointer.button_released(PointerButton::Primary) {
-                                if let Some(x) = &self.tx_trigger {
-                                    let trigger_note_off = TriggerNoteMsg {
-                                        note_type: NoteType::NoteOff,
-                                        freq: self.freq,
-                                        velocity: self.velocity,
-                                        length: self.length,
-                                    };
-                                    if let Err(e) = x.send(trigger_note_off) {
-                                        println!("could send trigger_note_off e: {}", e);
-                                    };
-                                }
+                        } else if input.pointer.button_released(PointerButton::Primary) {
+                            if let Some(x) = &self.tx_trigger {
+                                let trigger_note_off = TriggerNoteMsg {
+                                    note_type: NoteType::NoteOff,
+                                    freq: self.freq,
+                                    velocity: self.velocity,
+                                    length: self.length,
+                                };
+                                if let Err(e) = x.send(trigger_note_off) {
+                                    println!("could send trigger_note_off e: {}", e);
+                                };
                             }
                         }
                     });

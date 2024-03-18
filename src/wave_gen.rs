@@ -29,19 +29,19 @@ impl SineWave {
         num_samples: usize,
         offset: usize,
     ) -> SineWave {
-        return SineWave {
-            freq_base: freq_base,
-            amplitude: amplitude,
-            intensity_am: intensity_am,
-            freq_am: freq_am,
-            phase_am: phase_am,
-            intensity_fm: intensity_fm,
-            freq_fm: freq_fm,
-            phase_fm: phase_fm,
-            num_samples: num_samples,
-            offset: offset,
-            fs: fs,
-        };
+        SineWave {
+            freq_base,
+            amplitude,
+            intensity_am,
+            freq_am,
+            phase_am,
+            intensity_fm,
+            freq_fm,
+            phase_fm,
+            num_samples,
+            offset,
+            fs,
+        }
     }
 
     pub fn gen_values(&self) -> (usize, std::vec::Vec<f32>) {
@@ -71,6 +71,6 @@ impl SineWave {
                         .sin()))) as f32
             })
             .collect();
-        return (self.num_samples, values);
+        (self.num_samples, values)
     }
 }

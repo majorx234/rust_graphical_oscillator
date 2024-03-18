@@ -9,6 +9,12 @@ pub struct ToneMap {
     hm: HashMap<u32, tone::Tone>,
 }
 
+impl Default for ToneMap {
+    fn default() -> Self {
+        ToneMap::new()
+    }
+}
+
 impl ToneMap {
     pub fn new() -> ToneMap {
         ToneMap { hm: HashMap::new() }
@@ -41,10 +47,10 @@ impl ToneMap {
         println!("{:?}", self.hm);
     }
 
-    pub fn iterate_over_tones(&mut self, mut fnct: Box<dyn FnMut(&mut Tone) -> () + '_>) {
+    pub fn iterate_over_tones(&mut self, mut fnct: Box<dyn FnMut(&mut Tone) + '_>) {
         let mut tone_to_delete_key_list: Vec<u32> = Vec::new();
         for (key, value) in self.hm.iter_mut() {
-            if value.playing == false {
+            if !value.playing {
                 tone_to_delete_key_list.push(*key);
             } else {
                 fnct(value);

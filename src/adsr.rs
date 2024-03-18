@@ -71,7 +71,7 @@ impl Adsr {
     pub fn multiply_buf(
         &self,
         in_audio: &mut [f32],
-        adsr_env: &Vec<f32>,
+        adsr_env: &[f32],
         startpose: usize,
         size: usize,
         frame_size: usize,
@@ -88,10 +88,8 @@ impl Adsr {
         let mut nsamples = 0;
         if (startpose + frame_size) < sample_length {
             nsamples = frame_size;
-        } else {
-            if startpose < sample_length {
-                nsamples = (startpose + frame_size) - sample_length;
-            }
+        } else if startpose < sample_length {
+            nsamples = (startpose + frame_size) - sample_length;
         }
         let adsr_length = adsr_env.len();
         if adsr_length > nsamples + startpose {

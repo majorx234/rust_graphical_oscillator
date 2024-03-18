@@ -11,6 +11,12 @@ pub struct ToneHandling {
     tone_map: ToneMap,
 }
 
+impl Default for ToneHandling {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ToneHandling {
     pub fn new() -> Self {
         ToneHandling {
@@ -53,7 +59,7 @@ impl ToneHandling {
                 )
             }
             NoteType::NoteOff => {
-                self.tone_map.remove(tone.freq.clone());
+                self.tone_map.remove(tone.freq);
                 tone.adsr_envelope.ts = tone.last_sustain_value_a;
                 tone.envelope = Some(
                     tone.adsr_envelope
@@ -72,7 +78,7 @@ impl ToneHandling {
         multiply_output_r: &mut [f32],
         frame_size: usize,
     ) {
-        let count_tones: f32 = if self.tone_map.len() == 0 {
+        let count_tones: f32 = if self.tone_map.is_empty() {
             0.0
         } else {
             (self.tone_map.len() - 1) as f32

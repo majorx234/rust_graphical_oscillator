@@ -33,7 +33,7 @@ fn main() {
     let mut multiply_out_l: Vec<f32> = vec![1.0; frame_size];
     let mut multiply_out_r: Vec<f32> = vec![1.0; frame_size];
 
-    for _ in [0..10] {
+    for _ in 0..10 {
         let mut out_l: Vec<f32> = vec![0.0; frame_size];
         let mut out_r: Vec<f32> = vec![0.0; frame_size];
         tone_handling.process_tones(
@@ -56,7 +56,7 @@ fn main() {
 
     tone_handling.add_note_msg(trigger_msg2, adsr_envelope2, frame_size);
 
-    for _ in [0..10] {
+    for _ in 0..10 {
         let mut out_l: Vec<f32> = vec![0.0; frame_size];
         let mut out_r: Vec<f32> = vec![0.0; frame_size];
         tone_handling.process_tones(

@@ -68,7 +68,7 @@ impl Effect for Overdrive {
             let x = x * gain;
             let sign = x.signum();
             let x = x.abs();
-            if 0.0 <= x && x < 1.0 / 3.0 {
+            if (0.0..1.0 / 3.0).contains(&x) {
                 sign * 2.0 * x
             } else if 1.0 / 3.0 < x && x < 2.0 / 3.0 {
                 let t = 2.0 - 3.0 * x;
@@ -81,7 +81,7 @@ impl Effect for Overdrive {
         let unsymetrical_softclip: fn(f32, f32) -> f32 = |x: f32, gain: f32| {
             let x = x * gain;
             let x = x.abs();
-            if 0.0 <= x && x < 1.0 / 3.0 {
+            if (0.0..1.0 / 3.0).contains(&x) {
                 2.0 * x
             } else if 1.0 / 3.0 < x && x < 2.0 / 3.0 {
                 let t = 2.0 - 3.0 * x;

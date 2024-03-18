@@ -33,7 +33,7 @@ pub fn start_jack_thread(
             .unwrap();
 
         let mut frame_size = client.buffer_size() as usize;
-        if let Ok(_) = client.set_buffer_size(frame_size as u32) {
+        if client.set_buffer_size(frame_size as u32).is_ok() {
             // get frame size
             let frame_size = client.buffer_size() as usize;
             println!(
