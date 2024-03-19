@@ -22,15 +22,9 @@ pub fn start_jack_thread(
 
         let sample_rate = client.sample_rate();
         // register ports
-        let mut out_a = client
-            .register_port("gosci_out_l", jack::AudioOut::default())
-            .unwrap();
-        let mut out_b = client
-            .register_port("gosci_out_r", jack::AudioOut::default())
-            .unwrap();
-        let midi_in = client
-            .register_port("gosci_midi_in", jack::MidiIn::default())
-            .unwrap();
+        let mut out_a = client.register_port("gosci_out_l", jack::AudioOut).unwrap();
+        let mut out_b = client.register_port("gosci_out_r", jack::AudioOut).unwrap();
+        let midi_in = client.register_port("gosci_midi_in", jack::MidiIn).unwrap();
 
         let mut frame_size = client.buffer_size() as usize;
         if client.set_buffer_size(frame_size as u32).is_ok() {
