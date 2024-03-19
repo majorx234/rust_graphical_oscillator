@@ -61,10 +61,7 @@ impl Adsr {
             let s: f32 = sustain_value - sustain_value * ((k % max_release) as f32) / fmax_release;
             values_data.push(s);
         }
-
-        for _ in max_release..size as u32 {
-            values_data.push(0.0);
-        }
+        values_data.resize(size, 0.0);
         values_data
     }
 
