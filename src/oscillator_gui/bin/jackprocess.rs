@@ -3,8 +3,8 @@ extern crate wmidi;
 use bus::BusReader;
 use crossbeam_channel::{Receiver, Sender};
 use oscillator_lib::{
-    adsr::Adsr, ctrl_msg::CtrlMsg, jackmidi::MidiMsgGeneric, tone_handling::ToneHandling,
-    trigger_note_msg::TriggerNoteMsg,
+    adsr::Adsr, ctrl_msg::CtrlMsg, effect::Effect, jackmidi::MidiMsgGeneric, overdrive::Overdrive,
+    tone_handling::ToneHandling, trigger_note_msg::TriggerNoteMsg,
 };
 use std::{process::exit, thread, time::Duration};
 pub fn start_jack_thread(
@@ -66,6 +66,11 @@ pub fn start_jack_thread(
         let mut effect_in_l: Vec<f32> = vec![1.0; frame_size];
         let mut effect_in_r: Vec<f32> = vec![1.0; frame_size];
 
+        let mut effect_chain: Vec<Box<dyn Effect>> = Vec::new();
+        let mut overdrive = Overdrive::new();
+        overdrive.set_gain(1.0);
+        effect_chain.push(Box::new(overdrive));
+
         let process_callback = move |_: &jack::Client, ps: &jack::ProcessScope| -> jack::Control {
             let show_p = midi_in.iter(ps);
             for e in show_p {
@@ -94,7 +99,8 @@ pub fn start_jack_thread(
                 tone_handling.add_note_msg(rx_trigger_msg, adsr_envelope.clone(), frame_size);
             };
 
-            if ctrl_msg.effect.is_some() {
+            //if ctrl_msg.effect.is_some() {
+            if !effect_chain.is_empty() {
                 let out_a_p_inter = effect_in_l.as_mut_slice();
                 let out_b_p_inter = effect_in_r.as_mut_slice();
 
@@ -114,6 +120,9 @@ pub fn start_jack_thread(
                     &mut multiply_out_r,
                     frame_size,
                 );
+                // if let Some(ref mut effect) = ctrl_msg.effect {
+                // ToDo: check if there are new ctrl msgs for effects
+                /* ToDo delete, just testing purpose
                 if let Some(ref mut effect) = ctrl_msg.effect {
                     effect.process_samples(
                         Some(out_a_p_inter),
@@ -121,7 +130,14 @@ pub fn start_jack_thread(
                         Some(out_a_p),
                         Some(out_b_p),
                     );
-                };
+                };*/
+
+                effect_chain[0].process_samples(
+                    Some(out_a_p_inter),
+                    Some(out_b_p_inter),
+                    Some(out_a_p),
+                    Some(out_b_p),
+                );
             } else {
                 tone_handling.process_tones(
                     &ctrl_msg,
