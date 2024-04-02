@@ -1,4 +1,4 @@
-use crate::effect::Effect;
+use std::collections::HashMap;
 
 pub struct CtrlMsg {
     pub size: usize,
@@ -10,5 +10,5 @@ pub struct CtrlMsg {
     pub phase_fm: f32,
     pub num_samples: usize,
     pub volume: f32,
-    pub effect: Option<Box<dyn Effect>>,
+    pub effect_params: Option<HashMap<String, Vec<String>>>,
 }
