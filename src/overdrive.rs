@@ -39,12 +39,17 @@ impl Effect for Overdrive {
         "overdrive"
     }
 
-    fn set_params(&mut self, params: HashMap<String, Vec<String>>) {
+    fn set_params(&mut self, params: &HashMap<String, Vec<String>>) {
         // Todo
         if let Some(params) = params.get("overdrive") {
             for param in params {
                 if param.contains("gain") {
                     self.gain = param.split(' ').collect::<Vec<&str>>()[1].parse().unwrap();
+                    // println!("gain with: {}", self.gain);
+                }
+                if param.contains("bypass") {
+                    self.bypassing = param.split(' ').collect::<Vec<&str>>()[1].parse().unwrap();
+                    // println!("bypass: {}", self.bypassing);
                 }
             }
         }

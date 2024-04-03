@@ -59,7 +59,7 @@ pub fn start_jack_thread(
             phase_fm: 0.0,
             num_samples: frame_size,
             volume: 1.0,
-            effect: None,
+            effect_params: None,
         };
 
         let mut adsr_envelope = Adsr::new(0.1, 0.2, 0.5, 0.2);
@@ -103,6 +103,10 @@ pub fn start_jack_thread(
             if !effect_chain.is_empty() {
                 let out_a_p_inter = effect_in_l.as_mut_slice();
                 let out_b_p_inter = effect_in_r.as_mut_slice();
+
+                if let Some(ref effect_params) = ctrl_msg.effect_params {
+                    effect_chain[0].set_params(effect_params);
+                }
 
                 tone_handling.process_tones(
                     &ctrl_msg,

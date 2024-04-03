@@ -5,7 +5,7 @@ pub trait Effect: Send {
     where
         Self: Sized;
     fn name(&self) -> &'static str;
-    fn set_params(&mut self, params: HashMap<String, Vec<String>>);
+    fn set_params(&mut self, params: &HashMap<String, Vec<String>>);
     fn process_samples(
         &mut self,
         input_l: Option<&[f32]>,

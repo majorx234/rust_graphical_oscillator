@@ -51,7 +51,7 @@ impl Effect for Delay {
     fn name(&self) -> &'static str {
         "Delay"
     }
-    fn set_params(&mut self, params: HashMap<String, Vec<String>>) {
+    fn set_params(&mut self, _params: &HashMap<String, Vec<String>>) {
         // Todo
     }
 

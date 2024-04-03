@@ -27,7 +27,7 @@ fn main() {
         phase_fm: 0.0,
         num_samples: 96000,
         volume: 1.0,
-        effect: None,
+        effect_params: None,
     };
 
     let mut multiply_out_l: Vec<f32> = vec![1.0; frame_size];

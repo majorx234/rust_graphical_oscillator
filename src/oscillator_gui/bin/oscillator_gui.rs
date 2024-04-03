@@ -5,10 +5,9 @@ use eframe::egui::{self, PointerButton, ViewportCommand};
 use egui_plot::{Line, Plot, PlotPoints};
 use oscillator_lib::adsr::Adsr;
 use oscillator_lib::ctrl_msg::CtrlMsg;
-use oscillator_lib::effect::Effect;
-use oscillator_lib::overdrive::Overdrive;
 use oscillator_lib::trigger_note_msg::{NoteType, TriggerNoteMsg};
 use oscillator_lib::wave_gen::SineWave;
+use std::collections::HashMap;
 use std::f32::consts::PI;
 use std::thread;
 
@@ -147,12 +146,24 @@ impl eframe::App for OscillatorGui {
                 _velocity = trigger_note_msg.velocity;
             };
         };
-        let mut effect: Option<Box<dyn Effect>> = None;
+        //        let mut effect: Option<Box<dyn Effect>> = None;
+        let mut map: HashMap<String, Vec<String>> = HashMap::new();
         if self.overdrive_toggle {
-            let mut overdrive = Overdrive::new();
-            overdrive.set_gain(self.overdrive);
-            effect = Some(Box::new(overdrive));
+            map.insert(
+                "overdrive".to_string(),
+                vec![format!("gain {}", self.overdrive).to_string()],
+            );
+            map.insert(
+                "overdrive".to_string(),
+                vec![format!("bypass {}", false).to_string()],
+            );
+        } else {
+            map.insert(
+                "overdrive".to_string(),
+                vec![format!("bypass {}", true).to_string()],
+            );
         }
+        let effect_params: Option<HashMap<String, Vec<String>>> = Some(map);
         let msg = CtrlMsg {
             size: 1024,
             intensity_am: self.intensity_am,
@@ -163,7 +174,7 @@ impl eframe::App for OscillatorGui {
             phase_fm: self.phase_fm,
             num_samples: self.num_samples,
             volume: self.volume,
-            effect,
+            effect_params,
         };
         if let Some(ref x) = self.tx_ctrl {
             let _ = x.send(msg);
