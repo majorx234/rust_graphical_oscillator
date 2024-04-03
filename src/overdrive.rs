@@ -45,11 +45,9 @@ impl Effect for Overdrive {
             for param in params {
                 if param.contains("gain") {
                     self.gain = param.split(' ').collect::<Vec<&str>>()[1].parse().unwrap();
-                    // println!("gain with: {}", self.gain);
                 }
                 if param.contains("bypass") {
                     self.bypassing = param.split(' ').collect::<Vec<&str>>()[1].parse().unwrap();
-                    // println!("bypass: {}", self.bypassing);
                 }
             }
         }
