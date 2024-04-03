@@ -151,11 +151,10 @@ impl eframe::App for OscillatorGui {
         if self.overdrive_toggle {
             map.insert(
                 "overdrive".to_string(),
-                vec![format!("gain {}", self.overdrive).to_string()],
-            );
-            map.insert(
-                "overdrive".to_string(),
-                vec![format!("bypass {}", false).to_string()],
+                vec![
+                    format!("gain {}", self.overdrive).to_string(),
+                    format!("bypass {}", false).to_string(),
+                ],
             );
         } else {
             map.insert(
