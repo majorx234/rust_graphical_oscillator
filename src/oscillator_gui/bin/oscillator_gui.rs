@@ -4,7 +4,7 @@ use crossbeam_channel::{unbounded, Receiver, Sender};
 use eframe::egui::{self, PointerButton, ViewportCommand};
 use egui_plot::{Line, Plot, PlotPoints};
 use oscillator_lib::adsr::Adsr;
-use oscillator_lib::ctrl_msg::CtrlMsg;
+use oscillator_lib::ctrl_msg::{CtrlMsg, ParameterMap};
 use oscillator_lib::trigger_note_msg::{NoteType, TriggerNoteMsg};
 use oscillator_lib::wave_gen::SineWave;
 use std::collections::HashMap;
@@ -147,7 +147,7 @@ impl eframe::App for OscillatorGui {
             };
         };
         //        let mut effect: Option<Box<dyn Effect>> = None;
-        let mut map: HashMap<String, Vec<String>> = HashMap::new();
+        let mut map: ParameterMap = HashMap::new();
         if self.overdrive_toggle {
             map.insert(
                 "overdrive".to_string(),
@@ -162,7 +162,7 @@ impl eframe::App for OscillatorGui {
                 vec![format!("bypass {}", true).to_string()],
             );
         }
-        let effect_params: Option<HashMap<String, Vec<String>>> = Some(map);
+        let effect_params: Option<ParameterMap> = Some(map);
         let msg = CtrlMsg {
             size: 1024,
             intensity_am: self.intensity_am,

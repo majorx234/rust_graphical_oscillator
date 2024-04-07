@@ -2,6 +2,8 @@ use std::collections::HashMap;
 
 use crate::effect::Effect;
 
+pub type ParameterMap = HashMap<String, Vec<String>>;
+
 pub struct Overdrive {
     pub bypassing: bool,
     symetrical: bool,
@@ -39,7 +41,7 @@ impl Effect for Overdrive {
         "overdrive"
     }
 
-    fn set_params(&mut self, params: &HashMap<String, Vec<String>>) {
+    fn set_params(&mut self, params: &ParameterMap) {
         // Todo
         if let Some(params) = params.get("overdrive") {
             for param in params {

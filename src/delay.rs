@@ -53,7 +53,7 @@ impl Effect for Delay {
     fn name(&self) -> &'static str {
         "Delay"
     }
-    fn set_params(&mut self, params: &HashMap<String, Vec<String>>) {
+    fn set_params(&mut self, params: &ParameterMap) {
         // Todo
         if let Some(params) = params.get("delay") {
             for param in params {

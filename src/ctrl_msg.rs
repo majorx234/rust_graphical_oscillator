@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+pub type ParameterMap = HashMap<String, Vec<String>>;
+
 pub struct CtrlMsg {
     pub size: usize,
     pub intensity_am: f32,
@@ -10,5 +12,5 @@ pub struct CtrlMsg {
     pub phase_fm: f32,
     pub num_samples: usize,
     pub volume: f32,
-    pub effect_params: Option<HashMap<String, Vec<String>>>,
+    pub effect_params: Option<ParameterMap>,
 }
