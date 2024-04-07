@@ -2,6 +2,8 @@ use std::collections::HashMap;
 
 use crate::effect::Effect;
 
+pub type ParameterMap = HashMap<String, Vec<String>>;
+
 pub struct Delay {
     pub bypassing: bool,
     delay_buffer_l: Vec<f32>,
@@ -51,14 +53,17 @@ impl Effect for Delay {
     fn name(&self) -> &'static str {
         "Delay"
     }
-    fn set_params(&mut self, _params: &HashMap<String, Vec<String>>) {
+    fn set_params(&mut self, params: &HashMap<String, Vec<String>>) {
         // Todo
         if let Some(params) = params.get("delay") {
             for param in params {
                 if param.contains("delay_time") {
-                    self.gain = param.split(' ').collect::<Vec<&str>>()[1].parse().unwrap();
+                    self.delay_time = param.split(' ').collect::<Vec<&str>>()[1].parse().unwrap();
                 }
                 if param.contains("feedback") {
+                    self.feedback = param.split(' ').collect::<Vec<&str>>()[1].parse().unwrap();
+                }
+                if param.contains("bypass") {
                     self.bypassing = param.split(' ').collect::<Vec<&str>>()[1].parse().unwrap();
                 }
             }
