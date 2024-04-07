@@ -53,6 +53,16 @@ impl Effect for Delay {
     }
     fn set_params(&mut self, _params: &HashMap<String, Vec<String>>) {
         // Todo
+        if let Some(params) = params.get("delay") {
+            for param in params {
+                if param.contains("delay_time") {
+                    self.gain = param.split(' ').collect::<Vec<&str>>()[1].parse().unwrap();
+                }
+                if param.contains("feedback") {
+                    self.bypassing = param.split(' ').collect::<Vec<&str>>()[1].parse().unwrap();
+                }
+            }
+        }
     }
 
     fn process_samples(
