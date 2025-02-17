@@ -264,6 +264,7 @@ impl eframe::App for OscillatorGui {
                     let triger_button_rect = trigger_button.rect;
                     ui.input(|input| {
                         if input.pointer.button_pressed(PointerButton::Primary)
+                            && input.pointer.press_origin().is_some()
                             && triger_button_rect.contains(input.pointer.press_origin().unwrap())
                         {
                             if let Some(x) = &self.tx_trigger {
