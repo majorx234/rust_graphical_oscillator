@@ -1,7 +1,10 @@
 use crate::status_button::status_button;
 use bus::Bus;
 use crossbeam_channel::{unbounded, Receiver, Sender};
-use eframe::egui::{self, PointerButton, ViewportCommand};
+use eframe::{
+    egui::{self, PointerButton, ViewportCommand},
+    glow::Context,
+};
 use egui_plot::{Line, Plot, PlotPoints};
 use oscillator_lib::adsr::Adsr;
 use oscillator_lib::ctrl_msg::{CtrlMsg, ParameterMap};
@@ -315,6 +318,18 @@ impl eframe::App for OscillatorGui {
                 })
             });
         });
+    }
+    fn on_exit(&mut self, _gl: Option<&Context>) {
+        if let Some(ref mut tx_close) = self.tx_close {
+            if let Err(e) = tx_close.try_broadcast(false) {
+                println!("could not send close e: {}", e);
+            };
+
+            if let Some(jack_thread) = self.jack_thread.take() {
+                jack_thread.join().unwrap();
+            }
+            println!("jack_thread closed");
+        }
     }
 }
 
